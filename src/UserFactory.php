@@ -51,8 +51,9 @@ class UserFactory extends EntityFactory implements UserFactoryInterface
         if ($data->has('addresses')) {
             $addresses = $this->addressFactory->createAddresses($data->get('addresses'));
         } else {
-            // load default address
-            $addresses = $this->addressRepository->findAllDefaultByUserId($data->get('id', 0));
+            // load primary address:
+            $address = $this->addressRepository->findPrimaryByUserId($data->get('id', 0));
+            $addresses = $this->addressFactory->createAddresses($address);
         }
         
         // Create user:
@@ -108,7 +109,7 @@ class UserFactory extends EntityFactory implements UserFactoryInterface
      */
     public function createEntitiesFromStorageItems(ItemsInterface $items): iterable
     {
-        $addresses = $this->addressRepository->findAllDefaultByUserIdsGrouped($items->column('id'));
+        $addresses = $this->addressRepository->findAllPrimaryByUserIdsGrouped($items->column('id'));
         
         return $items->map(function(array $item) use ($addresses): UserInterface {
             $item['addresses'] = $addresses->get($item['id'] ?? 0, []);
