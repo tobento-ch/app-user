@@ -74,7 +74,7 @@ class UserFactoryTest extends TestCase
             'id' => 2,
             'email' => 'tom@example.com',
             'addresses' => [
-                ['key' => 'default', 'firstname' => 'Tom'],
+                ['key' => 'primary', 'firstname' => 'Tom'],
                 ['key' => 'payment', 'firstname' => 'John']
             ]
         ]);
@@ -83,12 +83,12 @@ class UserFactoryTest extends TestCase
         $this->assertSame('John', $user->address('payment')->firstname());
     }
     
-    public function testDefaultAddressesAreAssignedIfNoneDefined()
+    public function testPrimaryAddressesAreAssignedIfNoneDefined()
     {
         $userFactory = new UserFactory(
             acl: Factory::createAcl(),
             addressRepository: Factory::createAddressRepository([
-                ['user_id' => 2, 'firstname' => 'Tom', 'default_address' => true],
+                ['user_id' => 2, 'key' => 'primary', 'firstname' => 'Tom'],
             ]),
             addressFactory: Factory::createAddressFactory(),
         );
@@ -191,7 +191,7 @@ class UserFactoryTest extends TestCase
         $userFactory = new UserFactory(
             acl: Factory::createAcl(),
             addressRepository: Factory::createAddressRepository([
-                ['user_id' => 2, 'firstname' => 'Tom', 'default_address' => true],
+                ['user_id' => 2, 'key' => 'primary', 'firstname' => 'Tom'],
             ]),
             addressFactory: Factory::createAddressFactory(),
         );
