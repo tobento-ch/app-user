@@ -16,7 +16,7 @@
          resolveDependencies="true"
 >
     <testsuites>
-        <testsuite name="App I18n tests">
+        <testsuite name="App User tests">
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
