@@ -15,6 +15,7 @@ namespace Tobento\App\User\Boot;
 
 use Tobento\App\Boot;
 use Tobento\App\User\RoleRepositoryInterface;
+use Tobento\App\Boot\Functions;
 use Tobento\Service\Acl\AclInterface;
 use Tobento\Service\Acl\Acl as AclService;
 use Tobento\Service\Acl\Role;
@@ -30,13 +31,18 @@ class Acl extends Boot
             'implements acl interface and set roles',
         ],
     ];
+    
+    public const BOOT = [
+        Functions::class,
+    ];
 
     /**
      * Boot application services.
      *
+     * @param Functions $functions
      * @return void
      */
-    public function boot(): void
+    public function boot(Functions $functions): void
     {
         $this->app->set(AclInterface::class, function() {
             
@@ -55,6 +61,8 @@ class Acl extends Boot
             
             return $acl;
         });
+        
+        $functions->register($this->app->dir('vendor').'tobento/service-acl/src/functions.php');
     }
 
     /**
