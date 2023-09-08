@@ -18,6 +18,7 @@ use Tobento\App\Boot\Config;
 use Tobento\App\Migration\Boot\Migration;
 use Tobento\App\Http\Boot\Middleware;
 use Tobento\App\Database\Boot\Database;
+use Tobento\App\Validation\Boot\HttpValidationErrorHandler;
 use Tobento\App\Validation\Boot\Validator;
 use Tobento\App\Country\Boot\Country;
 use Tobento\App\User\Authentication\Token\TokenTransportsInterface;
@@ -42,6 +43,7 @@ class User extends Boot
         Middleware::class,
         Acl::class,
         Database::class,
+        HttpValidationErrorHandler::class,
         Validator::class,
         Country::class,
     ];
