@@ -60,7 +60,6 @@ class AddressStorageRepository extends StorageRepository implements AddressRepos
             Column\Text::new('key'),
             Column\Integer::new('user_id'),
             Column\Text::new('group'),
-            Column\Boolean::new('default_address'),
             Column\Text::new('salutation'),
             Column\Text::new('name'),
             Column\Text::new('firstname'),
@@ -88,14 +87,14 @@ class AddressStorageRepository extends StorageRepository implements AddressRepos
     }
     
     /**
-     * Returns the found address for the user id or null if none found.
+     * Returns the found primary address for the user id or null if none found.
      *
      * @param int|string $userId
      * @return null|AddressInterface
      */
-    public function findOneByUserId(int|string $userId): null|AddressInterface
+    public function findPrimaryByUserId(int|string $userId): null|AddressInterface
     {
-        return $this->findOne(where: ['user_id' => $userId]);
+        return $this->findOne(where: ['user_id' => $userId, 'key' => 'primary']);
     }
     
     /**
@@ -110,22 +109,9 @@ class AddressStorageRepository extends StorageRepository implements AddressRepos
             addresses: $this->findAll(where: ['user_id' => $userId])
         );
     }
-    
-    /**
-     * Returns the found default addresses for the user id.
-     *
-     * @param int|string $userId
-     * @return AddressesInterface
-     */
-    public function findAllDefaultByUserId(int|string $userId): AddressesInterface
-    {
-        return $this->addressFactory->createAddresses(
-            addresses: $this->findAll(where: ['user_id' => $userId, 'default_address' => true])
-        );
-    }
 
     /**
-     * Returns all default addresses for the user ids grouped by user id.
+     * Returns all addresses for the user ids grouped by user id.
      *
      * @param array $userIds
      * @return ItemsInterface
@@ -147,16 +133,16 @@ class AddressStorageRepository extends StorageRepository implements AddressRepos
     }
     
     /**
-     * Returns all default addresses for the user ids grouped by user id.
+     * Returns all primary addresses for the user ids grouped by user id.
      *
      * @param array $userIds
      * @return ItemsInterface
      */
-    public function findAllDefaultByUserIdsGrouped(array $userIds): ItemsInterface
+    public function findAllPrimaryByUserIdsGrouped(array $userIds): ItemsInterface
     {
         $items = parent::findAll(where: [
             'user_id' => ['in' => $userIds],
-            'default_address' => true,
+            'key' => 'primary',
         ]);
         
         if (! $items instanceof ItemsInterface) {
