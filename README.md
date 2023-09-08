@@ -642,13 +642,16 @@ class ArticleController
 
 **Using the user**
 
-```php    
+```php
 use Tobento\App\User\UserInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class ArticleController
 {
-    public function index(UserInterface $user): string
+    public function index(ServerRequestInterface $request): string
     {
+        $user = $request->getAttribute(UserInterface::class);
+        
         if ($user->cant('articles.read')) {
             return 'can not read';
         }
@@ -697,11 +700,14 @@ class ArticleController
 
 ```php    
 use Tobento\App\User\UserInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class ArticleController
 {
-    public function index(UserInterface $user): string
+    public function index(ServerRequestInterface $request): string
     {
+        $user = $request->getAttribute(UserInterface::class);
+    
         if ($user->hasRole() && $user->role()->key() !== 'editor') {
             return 'can not read';
         }
@@ -928,7 +934,7 @@ $app->route('GET', 'login', function() {
     return 'response';
 })->middleware(Unauthenticated::class)->name('login');
 
-$app->route('GET', 'account', function() {
+$app->route('GET', 'login', function() {
     // only for user unauthenticated user!
     return 'response';
 })->middleware([
@@ -948,7 +954,7 @@ $app->route('GET', 'account', function() {
 ]);
 
 // you may use the middleware alias defined in user config:
-$app->route('GET', 'account', function() {
+$app->route('GET', 'login', function() {
     return 'response';
 })->middleware(['guest', 'message' => 'Already authenticated!']);
 
