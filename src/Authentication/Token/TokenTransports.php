@@ -177,11 +177,15 @@ class TokenTransports implements TokenTransportsInterface, TokenTransportInterfa
         ResponseInterface $response,
     ): ResponseInterface {
         
-        if (is_null($this->tokenTransport)) {
-            return $response;
+        if (!is_null($this->tokenTransport)) {
+            return $this->tokenTransport->commitToken($token, $request, $response);
         }
         
-        return $this->tokenTransport->commitToken($token, $request, $response);
+        foreach($this->transports as $transport) {
+            $response = $transport->commitToken($token, $request, $response);
+        }
+        
+        return $response;
     }
 
     /**
@@ -198,11 +202,15 @@ class TokenTransports implements TokenTransportsInterface, TokenTransportInterfa
         ResponseInterface $response
     ): ResponseInterface {
         
-        if (is_null($this->tokenTransport)) {
-            return $response;
+        if (!is_null($this->tokenTransport)) {
+            return $this->tokenTransport->removeToken($token, $request, $response);
         }
         
-        return $this->tokenTransport->removeToken($token, $request, $response);
+        foreach($this->transports as $transport) {
+            $response = $transport->removeToken($token, $request, $response);
+        }
+        
+        return $response;
     }
     
     /**
