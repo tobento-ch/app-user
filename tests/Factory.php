@@ -44,21 +44,25 @@ use Tobento\Service\Acl\Role;
  */
 class Factory
 {
-    public static function createUserFactory(): UserFactoryInterface
-    {
+    public static function createUserFactory(
+        null|AddressRepositoryInterface $addressRepository = null,
+    ): UserFactoryInterface {
         return new UserFactory(
             acl: static::createAcl(),
-            addressRepository: static::createAddressRepository(),
+            addressRepository: $addressRepository ?: static::createAddressRepository(),
             addressFactory: static::createAddressFactory(),
         );
     }
     
     public static function createUserRepository(array $users = []): UserRepositoryInterface
     {
+        $addressRepo = static::createAddressRepository();
+        
         $repository = new UserStorageRepository(
             storage: new InMemoryStorage([]),
             table: 'users',
-            entityFactory: static::createUserFactory(),
+            userFactory: static::createUserFactory($addressRepo),
+            addressRepository: $addressRepo,
         );
         
         foreach($users as $user) {
