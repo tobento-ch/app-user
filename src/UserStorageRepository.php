@@ -18,12 +18,38 @@ use Tobento\Service\Repository\Storage\Column\ColumnsInterface;
 use Tobento\Service\Repository\Storage\Column\ColumnInterface;
 use Tobento\Service\Repository\Storage\Column;
 use Tobento\Service\Repository\RepositoryReadException;
+use Tobento\Service\Repository\RepositoryCreateException;
+use Tobento\Service\Repository\RepositoryUpdateException;
+use Tobento\Service\Repository\RepositoryDeleteException;
+use Tobento\Service\Storage\StorageInterface;
+use Throwable;
 
 /**
  * UserStorageRepository
  */
 class UserStorageRepository extends StorageRepository implements UserRepositoryInterface
 {
+    /**
+     * Create a new UserStorageRepository.
+     *
+     * @param StorageInterface $storage
+     * @param string $table
+     * @param UserFactoryInterface $userFactory
+     * @param AddressRepositoryInterface $addressRepository
+     * @param null|iterable<ColumnInterface>|ColumnsInterface $columns
+     */
+    public function __construct(
+        protected StorageInterface $storage,
+        protected string $table,
+        UserFactoryInterface $userFactory,
+        protected AddressRepositoryInterface $addressRepository,
+        null|iterable|ColumnsInterface $columns = null,
+    ) {
+        $this->columns = $this->processColumns($columns);
+        $this->entityFactory = $userFactory;
+        $this->entityFactory->setColumns($this->columns);
+    }
+    
     /**
      * Returns the configured columns.
      *
@@ -110,5 +136,120 @@ class UserStorageRepository extends StorageRepository implements UserRepositoryI
         return $this->createEntityOrNull(
             item: $query->first(),
         );
+    }
+    
+    /**
+     * Create a new user with primary address.
+     *
+     * @param array $user
+     * @param array $address
+     * @return UserInterface
+     * @throws RepositoryCreateException
+     */
+    public function createWithAddress(array $user, array $address = []): UserInterface
+    {
+        if (!empty($address)) {
+            return $this->createWithPrimaryAddress($user, $address);
+        }
+        
+        return $this->create($user);
+    }
+    
+    /**
+     * Update a user and its primary address.
+     *
+     * @param string|int $id The user id.
+     * @param array $user
+     * @param array $address
+     * @return UserInterface
+     * @throws RepositoryUpdateException
+     * @throws RepositoryCreateException
+     */
+    public function updateWithAddress(string|int $id, array $user, array $address = []): UserInterface
+    {
+        $user = $this->updateById($id, $user);
+        
+        if (empty($address)) {
+            return $user;
+        }
+            
+        $primaryAddress = $this->addressRepository->findPrimaryByUserId($id);
+
+        if (is_null($primaryAddress)) {
+            // create address:
+            $address['user_id'] = $id;
+            $address['key'] = 'primary';
+            
+            $address = $this->addressRepository->create($address);
+            
+            $user->addresses()->add($address);
+            return $user;
+        }
+        
+        // update address:
+        unset($address['user_id']);
+        unset($address['key']);
+        
+        $address = $this->addressRepository->updateById(
+            id: $primaryAddress->id(),
+            attributes: $address,
+        );
+
+        $user->addresses()->add($address);
+        
+        return $user;
+    }
+    
+    /**
+     * Delete an user with its addresses.
+     *
+     * @param string|int $id The user id.
+     * @return UserInterface
+     * @throws RepositoryDeleteException
+     */
+    public function deleteWithAddresses(string|int $id): UserInterface
+    {
+        $addresses = $this->addressRepository->delete(where: ['user_id' => $id]);
+        
+        $user = $this->deleteById($id);
+        
+        $user->addresses()->add(...$addresses);
+        
+        return $user;
+    }
+    
+    /**
+     * Create an user with primary address.
+     *
+     * @param array $user
+     * @param array $address
+     * @return UserInterface
+     * @throws RepositoryCreateException
+     */
+    protected function createWithPrimaryAddress(array $user, array $address): UserInterface
+    {
+        $this->storage()->begin();
+
+        try {
+            $createUser = $this->create($user);
+
+            $address['user_id'] = $createUser->id();
+            $address['key'] = 'primary';
+            
+            $createAddress = $this->addressRepository->create($address);
+
+            $createUser->addresses()->add($createAddress);
+            
+            $this->storage()->commit();
+            
+            return $createUser;
+            
+        } catch (Throwable $e) {
+            
+            $this->storage()->rollback();
+
+            $user['address'] = $address;
+            throw new RepositoryCreateException($user, $e->getMessage(), (int)$e->getCode(), $e);
+        }
     }
 }
