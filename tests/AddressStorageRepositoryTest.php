@@ -33,7 +33,7 @@ class AddressStorageRepositoryTest extends TestCase
         );
     }
     
-    public function testFindOneByUserIdMethod()
+    public function testFindPrimaryByUserIdMethod()
     {
         $repo = new AddressStorageRepository(
             storage: new InMemoryStorage([]),
@@ -41,10 +41,10 @@ class AddressStorageRepositoryTest extends TestCase
             addressFactory: Factory::createAddressFactory(),
         );
         
-        $repo->create(['user_id' => 5, 'firstname' => 'Tom']);
+        $repo->create(['user_id' => 5, 'key' => 'primary', 'firstname' => 'Tom']);
         
-        $this->assertNull($repo->findOneByUserId(2));
-        $this->assertSame('Tom', $repo->findOneByUserId(5)?->firstname());
+        $this->assertNull($repo->findPrimaryByUserId(2));
+        $this->assertSame('Tom', $repo->findPrimaryByUserId(5)?->firstname());
     }
     
     public function testFindAllByUserIdMethod()
@@ -60,21 +60,6 @@ class AddressStorageRepositoryTest extends TestCase
         
         $this->assertSame(0, count($repo->findAllByUserId(2)->all()));
         $this->assertSame(2, count($repo->findAllByUserId(5)->all()));
-    }
-    
-    public function testFindAllDefaultByUserIdMethod()
-    {
-        $repo = new AddressStorageRepository(
-            storage: new InMemoryStorage([]),
-            table: 'addresses',
-            addressFactory: Factory::createAddressFactory(),
-        );
-        
-        $repo->create(['user_id' => 5, 'firstname' => 'Tom']);
-        $repo->create(['user_id' => 5, 'firstname' => 'John', 'default_address' => true]);
-        
-        $this->assertSame(0, count($repo->findAllDefaultByUserId(2)->all()));
-        $this->assertSame(1, count($repo->findAllDefaultByUserId(5)->all()));
     }
     
     public function testFindAllByUserIdsGroupedMethod()
@@ -97,7 +82,7 @@ class AddressStorageRepositoryTest extends TestCase
         $this->assertSame([5,7], array_keys($items->all()));
     }
     
-    public function testFindAllDefaultByUserIdsGroupedMethod()
+    public function testFindAllPrimaryByUserIdsGroupedMethod()
     {
         $repo = new AddressStorageRepository(
             storage: new InMemoryStorage([]),
@@ -106,12 +91,12 @@ class AddressStorageRepositoryTest extends TestCase
         );
         
         $repo->create(['user_id' => 3, 'firstname' => 'Tom']);
-        $repo->create(['user_id' => 5, 'firstname' => 'Tom', 'default_address' => true]);
+        $repo->create(['user_id' => 5, 'firstname' => 'Tom', 'key' => 'primary']);
         $repo->create(['user_id' => 5, 'firstname' => 'Max']);
-        $repo->create(['user_id' => 7, 'firstname' => 'James', 'default_address' => true]);
-        $repo->create(['user_id' => 8, 'firstname' => 'Hannes', 'default_address' => true]);
+        $repo->create(['user_id' => 7, 'firstname' => 'James', 'key' => 'primary']);
+        $repo->create(['user_id' => 8, 'firstname' => 'Hannes', 'key' => 'primary']);
         
-        $items = $repo->findAllDefaultByUserIdsGrouped([5,7]);
+        $items = $repo->findAllPrimaryByUserIdsGrouped([5,7]);
         
         $this->assertSame(1, count($items->get(5)->all()));
         $this->assertSame(1, count($items->get(7)->all()));
@@ -126,8 +111,8 @@ class AddressStorageRepositoryTest extends TestCase
             addressFactory: Factory::createAddressFactory(locale: 'en'),
         );
         
-        $address = $repo->create(['user_id' => 5, 'country_key' => 'CH', 'country' => 'Schweiz']);
+        $address = $repo->create(['user_id' => 5, 'key' => 'primary', 'country_key' => 'CH', 'country' => 'Schweiz']);
         
-        $this->assertSame('Switzerland', $repo->findOneByUserId(5)->country());
+        $this->assertSame('Switzerland', $repo->findPrimaryByUserId(5)->country());
     }    
 }
