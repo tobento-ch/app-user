@@ -24,12 +24,12 @@ use Tobento\Service\Storage\ItemsInterface;
 interface AddressRepositoryInterface extends RepositoryInterface
 {
     /**
-     * Returns the found address for the user id or null if none found.
+     * Returns the found primary address for the user id or null if none found.
      *
      * @param int|string $userId
      * @return null|AddressInterface
      */
-    public function findOneByUserId(int|string $userId): null|AddressInterface;
+    public function findPrimaryByUserId(int|string $userId): null|AddressInterface;
     
     /**
      * Returns the found addresses for the user id.
@@ -38,17 +38,9 @@ interface AddressRepositoryInterface extends RepositoryInterface
      * @return AddressesInterface
      */
     public function findAllByUserId(int|string $userId): AddressesInterface;
-    
-    /**
-     * Returns the found default addresses for the user id.
-     *
-     * @param int|string $userId
-     * @return AddressesInterface
-     */
-    public function findAllDefaultByUserId(int|string $userId): AddressesInterface;
 
     /**
-     * Returns all default addresses for the user ids grouped by user id.
+     * Returns all addresses for the user ids grouped by user id.
      *
      * @param array $userIds
      * @return ItemsInterface
@@ -56,10 +48,10 @@ interface AddressRepositoryInterface extends RepositoryInterface
     public function findAllByUserIdsGrouped(array $userIds): ItemsInterface;
     
     /**
-     * Returns all default addresses for the user ids grouped by user id.
+     * Returns all primary addresses for the user ids grouped by user id.
      *
      * @param array $userIds
      * @return ItemsInterface
      */
-    public function findAllDefaultByUserIdsGrouped(array $userIds): ItemsInterface;
+    public function findAllPrimaryByUserIdsGrouped(array $userIds): ItemsInterface;
 }
