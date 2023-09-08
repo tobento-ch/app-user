@@ -33,7 +33,7 @@
         "tobento/app-validation": "^1.0",
         "tobento/app-country": "^1.0",
         "tobento/service-config": "^1.0",
-        "tobento/service-user": "^1.0",
+        "tobento/service-user": "^1.0.1",
         "tobento/service-acl": "^1.0",
         "tobento/service-clock": "^1.0",
         "tobento/service-repository": "^1.0",
