@@ -309,7 +309,7 @@ class AppTest extends TestCase
 
         (new TestResponse($app->get(Http::class)->getResponse()))
             ->isStatusCode(200);
-    }    
+    }
     
     public function testTokenExpiredWithUserErrorHandler()
     {
@@ -360,5 +360,31 @@ class AppTest extends TestCase
         (new TestResponse($app->get(Http::class)->getResponse()))
             ->isStatusCode(403)
             ->isBodySame('419 | Resource Expired');
+    }
+    
+    public function testUserPermissionWithUser()
+    {
+        $app = $this->createApp();
+        $app->boot(\Tobento\App\Http\Boot\Middleware::class);
+        $app->boot(\Tobento\App\Http\Boot\Routing::class);
+        $app->boot(\Tobento\App\User\Boot\HttpUserErrorHandler::class);
+        $app->boot(\Tobento\App\User\Boot\User::class);
+        
+        $app->on(ServerRequestInterface::class, function() {
+            return (new Psr17Factory())->createServerRequest(method: 'GET', uri: 'articles');
+        });
+
+        $app->booting();
+        
+        $app->route('GET', 'articles', function(ServerRequestInterface $request) {
+            $user = $request->getAttribute(UserInterface::class);
+            return $user->can('articles') ? 'true' : 'false';
+        })->name('articles');
+
+        $app->run();
+
+        (new TestResponse($app->get(Http::class)->getResponse()))
+            ->isStatusCode(200)
+            ->isBodySame('false');
     }
 }
