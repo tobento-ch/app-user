@@ -16,8 +16,11 @@ namespace Tobento\App\User\Test;
 use PHPUnit\Framework\TestCase;
 use Tobento\App\User\Test\Factory;
 use Tobento\App\User\UserStorageRepository;
+use Tobento\App\User\AddressStorageRepository;
 use Tobento\App\User\UserRepositoryInterface;
 use Tobento\Service\Storage\InMemoryStorage;
+use Tobento\Service\Repository\Storage\Column;
+use Throwable;
     
 class UserStorageRepositoryTest extends TestCase
 {    
@@ -28,7 +31,8 @@ class UserStorageRepositoryTest extends TestCase
             new UserStorageRepository(
                 storage: new InMemoryStorage([]),
                 table: 'users',
-                entityFactory: Factory::createUserFactory(),
+                userFactory: Factory::createUserFactory(),
+                addressRepository: Factory::createAddressRepository(),
             )
         );
     }
@@ -38,7 +42,8 @@ class UserStorageRepositoryTest extends TestCase
         $repo = new UserStorageRepository(
             storage: new InMemoryStorage([]),
             table: 'users',
-            entityFactory: Factory::createUserFactory(),
+            userFactory: Factory::createUserFactory(),
+            addressRepository: Factory::createAddressRepository(),
         );
         
         $this->assertNull($repo->findOne());
@@ -55,7 +60,8 @@ class UserStorageRepositoryTest extends TestCase
         $repo = new UserStorageRepository(
             storage: new InMemoryStorage([]),
             table: 'users',
-            entityFactory: Factory::createUserFactory(),
+            userFactory: Factory::createUserFactory(),
+            addressRepository: Factory::createAddressRepository(),
         );
         
         $this->assertNull($repo->findById(1));
@@ -71,7 +77,8 @@ class UserStorageRepositoryTest extends TestCase
         $repo = new UserStorageRepository(
             storage: new InMemoryStorage([]),
             table: 'users',
-            entityFactory: Factory::createUserFactory(),
+            userFactory: Factory::createUserFactory(),
+            addressRepository: Factory::createAddressRepository(),
         );
         
         $this->assertNull($repo->findByIdentity(email: 'tom@example.com'));
@@ -87,5 +94,231 @@ class UserStorageRepositoryTest extends TestCase
         $this->assertSame(5, $repo->findByIdentity(email: 'tom@example.com', username: 'Foo')?->id());
         $this->assertSame(5, $repo->findByIdentity(email: 'tom@example.com', username: 'Foo', smartphone: '333')?->id());
         $this->assertSame(5, $repo->findByIdentity(email: 'foo@example.com', username: 'TOM')?->id());
+    }
+    
+    public function testCreateWithAddressMethod()
+    {
+        $addressRepo = Factory::createAddressRepository();
+        
+        $repo = new UserStorageRepository(
+            storage: new InMemoryStorage([]),
+            table: 'users',
+            userFactory: Factory::createUserFactory(addressRepository: $addressRepo),
+            addressRepository: $addressRepo,
+        );
+        
+        $createUser = $repo->createWithAddress(
+            user: [
+                'id' => 5,
+                'email' => 'tom@example.com',
+                'smartphone' => '555',
+            ],
+            address: [
+                'firstname' => 'Tom',
+                'lastname' => 'Taylor',
+            ],
+        );
+        
+        $this->assertSame(5, $createUser->id());
+        $this->assertSame('Tom', $createUser->address()->firstname());
+        
+        $user = $repo->findById(5);
+        $this->assertSame(5, $user->id());
+        $this->assertSame('Tom', $user->address()->firstname());
+    }
+    
+    public function testCreateWithAddressMethodWithoutAddress()
+    {
+        $addressRepo = Factory::createAddressRepository();
+        
+        $repo = new UserStorageRepository(
+            storage: new InMemoryStorage([]),
+            table: 'users',
+            userFactory: Factory::createUserFactory(addressRepository: $addressRepo),
+            addressRepository: $addressRepo,
+        );
+        
+        $createUser = $repo->createWithAddress(
+            user: [
+                'id' => 5,
+                'email' => 'tom@example.com',
+                'smartphone' => '555',
+            ],
+        );
+        
+        $this->assertSame(5, $createUser->id());
+        $this->assertSame('', $createUser->address()->firstname());
+        
+        $user = $repo->findById(5);
+        $this->assertSame(5, $user->id());
+        $this->assertSame('', $user->address()->firstname());
+        
+        $this->assertSame(0, $addressRepo->findAll()->count());
     }    
+    
+    public function testCreateWithAddressMethodRollsbackOnFailure()
+    {
+        $addressRepo = new AddressStorageRepository(
+            storage: new InMemoryStorage([]),
+            table: 'addresses',
+            addressFactory: Factory::createAddressFactory(),
+            columns: [
+                Column\Id::new(),
+                Column\Text::new('key'),
+                Column\Integer::new('user_id'),
+                Column\Text::new('firstname')->write(fn () => throw new \Exception()),
+            ],
+        );
+        
+        $repo = new UserStorageRepository(
+            storage: new InMemoryStorage([]),
+            table: 'users',
+            userFactory: Factory::createUserFactory(addressRepository: $addressRepo),
+            addressRepository: $addressRepo,
+        );
+
+        try {
+            $createUser = $repo->createWithAddress(
+                user: [
+                    'id' => 5,
+                    'email' => 'tom@example.com',
+                    'smartphone' => '555',
+                ],
+                address: [
+                    'firstname' => 'Tom',
+                    'lastname' => 'Taylor',
+                ],
+            );
+        } catch (Throwable $t) {
+            //throw $t;
+        }
+        
+        $this->assertSame(0, $repo->findAll()->count());
+        $this->assertSame(0, $addressRepo->findAll()->count());
+    }
+    
+    public function testUpdateWithAddressMethod()
+    {
+        $addressRepo = Factory::createAddressRepository();
+        
+        $repo = new UserStorageRepository(
+            storage: new InMemoryStorage([]),
+            table: 'users',
+            userFactory: Factory::createUserFactory(addressRepository: $addressRepo),
+            addressRepository: $addressRepo,
+        );
+        
+        $repo->createWithAddress(
+            user: [
+                'id' => 5,
+                'email' => 'tom@example.com',
+                'smartphone' => '555',
+            ],
+            address: [
+                'firstname' => 'Tom',
+                'lastname' => 'Taylor',
+            ],
+        );
+        
+        $updatedUser = $repo->updateWithAddress(
+            id: 5,
+            user: [
+                'email' => 'tim@example.com',
+                'smartphone' => '333',
+            ],
+            address: [
+                'firstname' => 'Tim',
+                'lastname' => 'Thomsen',
+            ],
+        );
+        
+        $this->assertSame(5, $updatedUser->id());
+        $this->assertSame('333', $updatedUser->smartphone());
+        $this->assertSame('Tim', $updatedUser->address()->firstname());
+        
+        $user = $repo->findById(5);
+        $this->assertSame(5, $user->id());
+        $this->assertSame('333', $user->smartphone());
+        $this->assertSame('Tim', $user->address()->firstname());
+        
+        $this->assertSame(1, $repo->findAll()->count());
+        $this->assertSame(1, $addressRepo->findAll()->count());
+    }
+    
+    public function testUpdateWithAddressMethodIfNoAddress()
+    {
+        $addressRepo = Factory::createAddressRepository();
+        
+        $repo = new UserStorageRepository(
+            storage: new InMemoryStorage([]),
+            table: 'users',
+            userFactory: Factory::createUserFactory(addressRepository: $addressRepo),
+            addressRepository: $addressRepo,
+        );
+        
+        $repo->createWithAddress(
+            user: [
+                'id' => 5,
+                'email' => 'tom@example.com',
+                'smartphone' => '555',
+            ],
+        );
+        
+        $updatedUser = $repo->updateWithAddress(
+            id: 5,
+            user: [
+                'email' => 'tim@example.com',
+                'smartphone' => '333',
+            ],
+            address: [
+                'firstname' => 'Tim',
+                'lastname' => 'Thomsen',
+            ],
+        );
+        
+        $this->assertSame(5, $updatedUser->id());
+        $this->assertSame('333', $updatedUser->smartphone());
+        $this->assertSame('Tim', $updatedUser->address()->firstname());
+        
+        $user = $repo->findById(5);
+        $this->assertSame(5, $user->id());
+        $this->assertSame('333', $user->smartphone());
+        $this->assertSame('Tim', $user->address()->firstname());
+        
+        $this->assertSame(1, $repo->findAll()->count());
+        $this->assertSame(1, $addressRepo->findAll()->count());        
+    }
+    
+    public function testDeleteWithAddressesMethod()
+    {
+        $addressRepo = Factory::createAddressRepository();
+        
+        $repo = new UserStorageRepository(
+            storage: new InMemoryStorage([]),
+            table: 'users',
+            userFactory: Factory::createUserFactory(addressRepository: $addressRepo),
+            addressRepository: $addressRepo,
+        );
+        
+        $repo->createWithAddress(
+            user: [
+                'id' => 5,
+                'email' => 'tom@example.com',
+                'smartphone' => '555',
+            ],
+            address: [
+                'firstname' => 'Tom',
+                'lastname' => 'Taylor',
+            ],
+        );
+        
+        $deletedUser = $repo->deleteWithAddresses(id: 5);
+        
+        $this->assertSame(5, $deletedUser->id());
+        $this->assertSame('555', $deletedUser->smartphone());
+        $this->assertSame('Tom', $deletedUser->address()->firstname());
+        
+        $this->assertSame(0, $repo->findAll()->count());
+        $this->assertSame(0, $addressRepo->findAll()->count());
+    }
 }
