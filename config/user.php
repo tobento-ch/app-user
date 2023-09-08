@@ -154,7 +154,8 @@ return [
             return new User\UserStorageRepository(
                 storage: $c->get(StorageInterface::class)->new(),
                 table: 'users',
-                entityFactory: $c->get(User\UserFactoryInterface::class),
+                userFactory: $c->get(User\UserFactoryInterface::class),
+                addressRepository: $c->get(User\AddressRepositoryInterface::class),
             );
         },
         
