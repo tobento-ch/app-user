@@ -29,10 +29,12 @@ final class TokenPasswordHashVerifier implements TokenVerifierInterface
      *
      * @param array $issuers The token issuers (storage names) to verify password hash.
      *                       If empty it gets verified for all issuers.
+     * @param null|string $authenticatedVia If specified, it gets verified only on those.
      * @param string $name
      */
     public function __construct(
         private array $issuers = [],
+        private null|string $authenticatedVia = null,
         private string $name = 'passwordHash',
     ) {}
     
@@ -49,6 +51,13 @@ final class TokenPasswordHashVerifier implements TokenVerifierInterface
         if (
             !empty($this->issuers)
             && !in_array($token->issuedBy(), $this->issuers)
+        ) {
+            return;
+        }
+        
+        if (
+            !is_null($this->authenticatedVia)
+            && !in_array($token->authenticatedVia(), explode('|', $this->authenticatedVia))
         ) {
             return;
         }
