@@ -28,6 +28,7 @@ User support for the app with authentication and authorization.
         - [Authentication With Middleware](#authentication-with-middleware)
         - [Authenticated Middleware](#authenticated-middleware)
         - [Unauthenticated Middleware](#unauthenticated-middleware)
+        - [Verified Middleware](#verified-middleware)
         - [Verify Permission Middleware](#verify-permission-middleware)
         - [Verify Role Middleware](#verify-role-middleware)
     - [Authenticator](#authenticator)
@@ -39,6 +40,7 @@ User support for the app with authentication and authorization.
         - [Token Authenticator](#token-authenticator)
         - [Token Verifier](#token-verifier)
             - [Token Password Hash Verifier](#token-verifier)
+            - [Token Payload Verifier](#token-payload-verifier)
     - [Token Storage](#token-storage)
         - [Null Storage](#null-storage)
         - [In Memory Storage](#in-memory-storage)
@@ -52,6 +54,7 @@ User support for the app with authentication and authorization.
     - [Learn More](#learn-more)
         - [Different Authentication Per Routes](#different-authentication-per-routes)
         - [Password Hashing](#password-hashing)
+        - [User Channel Verification](#user-channel-verification)
     - [App User Bundles](#app-user-bundles)
 - [Credits](#credits)
 ___
@@ -805,12 +808,16 @@ public function process(ServerRequestInterface $request, RequestHandlerInterface
         try {
             $token = $this->tokenStorage->fetchToken($tokenId);
             $user = $this->tokenAuthenticator->authenticate($token);
+
+            $this->auth->start(
+                new Authenticated(token: $token, user: $user),
+                $this->tokenTransport->name()
+            );
         } catch (TokenNotFoundException $e) {
-            return $handler->handle($request);
+            // ignore TokenNotFoundException as to
+            // proceed with handling the response.
             // other exceptions will be handled by the error handler!
         }
-
-        $this->auth->start(new Authenticated(token: $token, user: $user), $this->tokenTransport->name());
     }
 
     // Handle the response:
@@ -821,7 +828,7 @@ public function process(ServerRequestInterface $request, RequestHandlerInterface
     }
 
     if ($this->auth->isClosed()) {
-        $this->tokenStorage->delete($this->auth->getAuthenticated()->token());
+        $this->tokenStorage->deleteToken($this->auth->getAuthenticated()->token());
 
         return $this->tokenTransport->removeToken(
             token: $this->auth->getAuthenticated()->token(),
@@ -867,12 +874,12 @@ $app->booting();
 
 // Routes:
 $app->route('GET', 'account', function() {
-    // only for user authenticated user!
+    // only for authenticated user!
     return 'response';
 })->middleware(Authenticated::class)->name('account');
 
 $app->route('GET', 'account', function() {
-    // only for user authenticated user!
+    // only for authenticated user!
     return 'response';
 })->middleware([
     Authenticated::class,
@@ -930,12 +937,12 @@ $app->booting();
 
 // Routes:
 $app->route('GET', 'login', function() {
-    // only for user unauthenticated user!
+    // only for unauthenticated user!
     return 'response';
 })->middleware(Unauthenticated::class)->name('login');
 
 $app->route('GET', 'login', function() {
-    // only for user unauthenticated user!
+    // only for unauthenticated user!
     return 'response';
 })->middleware([
     Unauthenticated::class,
@@ -961,6 +968,71 @@ $app->route('GET', 'login', function() {
 // Run the app:
 $app->run();
 ```
+
+### Verified Middleware
+
+The ```Verified::class``` middleware protects routes from unverified users.
+
+```php
+use Tobento\App\AppFactory;
+use Tobento\App\User\Middleware\Verified;
+
+$app = (new AppFactory())->createApp();
+
+// Add directories:
+$app->dirs()
+    ->dir(realpath(__DIR__.'/../'), 'root')
+    ->dir(realpath(__DIR__.'/../app/'), 'app')
+    ->dir($app->dir('app').'config', 'config', group: 'config')
+    ->dir($app->dir('root').'public', 'public')
+    ->dir($app->dir('root').'vendor', 'vendor');
+
+// Adding boots:
+$app->boot(\Tobento\App\Http\Boot\Routing::class);
+$app->boot(\Tobento\App\User\Boot\User::class);
+$app->booting();
+
+// Routes:
+$app->route('GET', 'account', function() {
+    // only for users with at least one channel verified!
+    return 'response';
+})->middleware(Verified::class)->name('account');
+
+$app->route('GET', 'account', function() {
+    // only for users with specific channels verified!
+    return 'response';
+})->middleware([
+    Verified::class,
+    
+    // specify the channels the user must have at least verified one of:
+    'oneOf' => 'email|smartphone',
+    
+    // OR specify the channels the user must have verified all:
+    'allOf' => 'email|smartphone',
+    
+    // you may specify a custom message to show to the user:
+    'message' => 'You are not verified to access the resource!',
+    
+    // you may specify a message level:
+    'messageLevel' => 'notice',
+    
+    // you may specify a route name for redirection:
+    'redirectRoute' => 'login',
+    
+    // or you may specify an uri for redirection
+    'redirectUri' => '/login',
+]);
+
+// you may use the middleware alias defined in user config:
+$app->route('GET', 'account', function() {
+    return 'response';
+})->middleware(['verified', 'oneOf' => 'email|smartphone']);
+
+// Run the app:
+$app->run();
+```
+
+Check out the [User Channel Verification](#user-channel-verification) section to learn more about it.
 
 ### Verify Permission Middleware
 
@@ -1325,9 +1397,37 @@ $verifier = new TokenPasswordHashVerifier(
     // The token issuers (storage names) to verify password hash. 
     // If empty it gets verified for all issuers.
     issuers: ['session'],
-
+    
+    // Will only be verified if authenticated
+    // via remembered or loginlink if specified:
+    authenticatedVia: 'remembered|loginlink',
+    
     // The attribute name of the payload:
     name: 'passwordHash',
+);
+```
+
+#### Token Payload Verifier
+
+The ```TokenPayloadVerifier::class``` may be used to invalidate tokens if the specified payload attribute does not match the given value.
+
+```php
+use Tobento\App\User\Authenticator\TokenPayloadVerifier;
+
+$verifier = new TokenPayloadVerifier(
+    // Specify the payload attribute name:
+    name: 'remoteAddress',
+    
+    // Specify the value to match:
+    value: $_SERVER['REMOTE_ADDR'] ?? null,
+
+    // The token issuers (storage names) to verify password hash. 
+    // If empty it gets verified for all issuers.
+    issuers: ['session'],
+    
+    // Will only be verified if authenticated
+    // via remembered or loginlink if specified:
+    authenticatedVia: 'remembered|loginlink',
 );
 ```
 
@@ -1770,6 +1870,73 @@ The following authenticators use the password hasher to verify the password:
 
 * [Identity Authenticator](#identity-authenticator)
 * [Attributes Authenticator](#attributes-authenticator)
+
+### User Channel Verification
+
+**Adding verified channels**
+
+```php
+use Tobento\App\User\UserRepositoryInterface;
+use DateTime;
+
+class SomeService
+{
+    public function __construct(
+        private UserRepositoryInterface $userRepository,
+    ) {
+        $updatedUser = $userRepository->addVerified(
+            id: 5, // user id
+            channel: 'email',
+            verifiedAt: new DateTime('2023-09-24 00:00:00'),
+        );
+    }
+}
+```
+
+**Removing verified channels**
+
+```php
+use Tobento\App\User\UserRepositoryInterface;
+use DateTime;
+
+class SomeService
+{
+    public function __construct(
+        private UserRepositoryInterface $userRepository,
+    ) {
+        $updatedUser = $userRepository->removeVerified(
+            id: 5, // user id
+            channel: 'email',
+        );
+    }
+}
+```
+
+**User verified methods**
+
+```php
+use Tobento\App\User\UserInterface;
+
+var_dump($user instanceof UserInterface);
+// bool(true)
+
+// Get the verified channels:
+$verified = $user->getVerified();
+// ['email' => '2023-09-24 00:00:00']
+
+// Get the date verified at for a specific channel:
+$emailVerifiedAt = $user->getVerifiedAt(channel: 'email');
+// '2023-09-24 00:00:00' or NULL
+
+// Returns true if the specified channels are verified, otherwise false.
+$verified = $user->isVerified(channels: ['email', 'smartphone']);
+
+// Returns true if at least one channel is verified, otherwise false.
+$verified = $user->isOneVerified();
+
+// or one of the specified channels:
+$verified = $user->isOneVerified(channels: ['email', 'smartphone']);
+```
 
 ## App User Bundles
 
