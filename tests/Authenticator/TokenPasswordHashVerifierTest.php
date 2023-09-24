@@ -100,13 +100,15 @@ class TokenPasswordHashVerifierTest extends TestCase
     
     public function testVerifyWithIssuers()
     {
+        $this->expectException(TokenException::class);
+        
         $verifier = new TokenPasswordHashVerifier(
             issuers: ['session']
         );
         
         $token = new Token(
             id: 'ID',
-            payload: ['userId' => 2, 'passwordHash' => 'hashedPassword'],
+            payload: ['userId' => 2, 'passwordHash' => 'hashedPasswordFoo'],
             authenticatedVia: 'via',
             authenticatedBy: null,
             issuedBy: 'session',
@@ -119,8 +121,6 @@ class TokenPasswordHashVerifierTest extends TestCase
         );
         
         $verifier->verify(token: $token, user: $user);
-        
-        $this->assertTrue(true);
     }
     
     public function testVerifyWithIssuersPassesIfNotMatchingIssuer()
@@ -135,6 +135,56 @@ class TokenPasswordHashVerifierTest extends TestCase
             authenticatedVia: 'via',
             authenticatedBy: null,
             issuedBy: 'storage',
+            issuedAt: new DateTimeImmutable('now'),
+        );
+        
+        $user = new User(
+            id: 1,
+            password: 'hashedPassword',
+        );
+        
+        $verifier->verify(token: $token, user: $user);
+        
+        $this->assertTrue(true);
+    }
+    
+    public function testVerifyWithAuthenticatedVia()
+    {
+        $this->expectException(TokenException::class);
+        
+        $verifier = new TokenPasswordHashVerifier(
+            authenticatedVia: 'remembered|loginlink',
+        );
+        
+        $token = new Token(
+            id: 'ID',
+            payload: ['userId' => 2, 'passwordHash' => 'hashedPasswordFoo'],
+            authenticatedVia: 'remembered',
+            authenticatedBy: null,
+            issuedBy: 'session',
+            issuedAt: new DateTimeImmutable('now'),
+        );
+        
+        $user = new User(
+            id: 1,
+            password: 'hashedPassword',
+        );
+        
+        $verifier->verify(token: $token, user: $user);
+    }
+    
+    public function testVerifyWithAuthenticatedViaPassesIfNotMatchingVia()
+    {
+        $verifier = new TokenPasswordHashVerifier(
+            authenticatedVia: 'remembered|loginlink',
+        );
+        
+        $token = new Token(
+            id: 'ID',
+            payload: ['userId' => 2, 'passwordHash' => 'hashedPasswordFoo'],
+            authenticatedVia: 'via',
+            authenticatedBy: null,
+            issuedBy: 'session',
             issuedAt: new DateTimeImmutable('now'),
         );
         
