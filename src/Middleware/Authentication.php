@@ -66,12 +66,16 @@ class Authentication implements MiddlewareInterface
             try {
                 $token = $this->tokenStorage->fetchToken($tokenId);
                 $user = $this->tokenAuthenticator->authenticate($token);
+                
+                $this->auth->start(
+                    new Authenticated(token: $token, user: $user),
+                    $this->tokenTransport->name()
+                );
             } catch (TokenNotFoundException $e) {
-                return $handler->handle($request);
+                // ignore TokenNotFoundException as to
+                // proceed with handling the response.
                 // other exceptions will be handled by the error handler!
             }
-            
-            $this->auth->start(new Authenticated(token: $token, user: $user), $this->tokenTransport->name());
         }
         
         // Handle the response:
