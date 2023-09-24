@@ -67,6 +67,7 @@ return [
         'auth.with' => User\Middleware\AuthenticationWith::class,
         'auth' => User\Middleware\Authenticated::class,
         'guest' => User\Middleware\Unauthenticated::class,
+        'verified' => User\Middleware\Verified::class,
         
         // Authorization:
         'can' => User\Middleware\VerifyPermission::class,
