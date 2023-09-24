@@ -28,7 +28,12 @@ class User extends BaseUser implements UserInterface, Authorizable
      * @var bool
      */
     protected bool $isAuthenticated = false;
-
+    
+    /**
+     * @var array<string, string> The verified channels.
+     */
+    protected array $verified = [];
+    
     /**
      * Set if the user is authenticated.
      *
@@ -52,6 +57,84 @@ class User extends BaseUser implements UserInterface, Authorizable
     }
     
     /**
+     * Set the verified channels.
+     *
+     * @param array<string, string> $verified
+     * @return static $this
+     */
+    public function setVerified(array $verified): static
+    {
+        $this->verified = $verified;
+        return $this;
+    }
+    
+    /**
+     * Returns all verified channels.
+     *
+     * @return array<string, string>
+     */
+    public function getVerified(): array
+    {
+        return $this->verified;
+    }
+    
+    /**
+     * Returns the verified at date for the specified channel.
+     *
+     * @return null|string
+     */
+    public function getVerifiedAt(string $channel): null|string
+    {
+        return $this->getVerified()[$channel] ?? null;
+    }
+    
+    /**
+     * Returns true if the specified channels are verified, otherwise false.
+     *
+     * @param array $channels The channels (email, smartphone e.g).
+     * @return bool
+     */
+    public function isVerified(array $channels): bool
+    {
+        if (empty($channels)) {
+            return false;
+        }
+        
+        $verified = array_keys($this->getVerified());
+        
+        foreach($channels as $channel) {
+            if (!in_array($channel, $verified)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Returns true if at least one channel is verified, otherwise false.
+     *
+     * @param null|array $channels At least one of the channels must be verified.
+     * @return bool
+     */
+    public function isOneVerified(null|array $channels = null): bool
+    {
+        if (is_null($channels)) {
+            return !empty($this->getVerified());
+        }
+        
+        $verified = array_keys($this->getVerified());
+        
+        foreach($channels as $channel) {
+            if (in_array($channel, $verified)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
      * Object to array
      *
      * @return array
@@ -62,6 +145,7 @@ class User extends BaseUser implements UserInterface, Authorizable
         
         $user = parent::toArray();
         $user['isAuthenticated'] = $this->isAuthenticated();
+        $user['verified'] = $this->getVerified();
         $user['role'] = [
             'key' => $role->key(),
             'name' => $role->name(),

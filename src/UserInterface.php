@@ -35,4 +35,42 @@ interface UserInterface extends BaseUserInterface, Authorizable
      * @return bool
      */
     public function isAuthenticated(): bool;
+    
+    /**
+     * Set the verified channels.
+     *
+     * @param array<string, string> $verified
+     * @return static $this
+     */
+    public function setVerified(array $verified): static;
+    
+    /**
+     * Returns all verified channels.
+     *
+     * @return array<string, string>
+     */
+    public function getVerified(): array;
+    
+    /**
+     * Returns the verified at date for the specified channel.
+     *
+     * @return null|string
+     */
+    public function getVerifiedAt(string $channel): null|string;
+    
+    /**
+     * Returns true if the specified channels are verified, otherwise false.
+     *
+     * @param array $channels The channels (email, smartphone e.g).
+     * @return bool
+     */
+    public function isVerified(array $channels): bool;
+    
+    /**
+     * Returns true if at least one channel is verified, otherwise false.
+     *
+     * @param null|array $channels At least one of the channels must be verified.
+     * @return bool
+     */
+    public function isOneVerified(null|array $channels = null): bool;
 }

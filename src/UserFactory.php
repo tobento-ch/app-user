@@ -98,6 +98,9 @@ class UserFactory extends EntityFactory implements UserFactoryInterface
             $user->addPermissions($data->get('permissions', []));
         }
         
+        // Verified:
+        $user->setVerified($data->get('verified', []));
+        
         return $user;
     }
     
