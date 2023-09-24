@@ -22,6 +22,7 @@ use Tobento\Service\Repository\RepositoryCreateException;
 use Tobento\Service\Repository\RepositoryUpdateException;
 use Tobento\Service\Repository\RepositoryDeleteException;
 use Tobento\Service\Storage\StorageInterface;
+use DateTimeInterface;
 use Throwable;
 
 /**
@@ -75,6 +76,7 @@ class UserStorageRepository extends StorageRepository implements UserRepositoryI
             Column\Json::new('image'),
             Column\Boolean::new('newsletter'),
             Column\Json::new('permissions'),
+            Column\Json::new('verified'),
         ];
     }
     
@@ -251,5 +253,60 @@ class UserStorageRepository extends StorageRepository implements UserRepositoryI
             $user['address'] = $address;
             throw new RepositoryCreateException($user, $e->getMessage(), (int)$e->getCode(), $e);
         }
+    }
+    
+    /**
+     * Add a verified channel.
+     *
+     * @param string|int $id The user id.
+     * @param string $channel
+     * @param DateTimeInterface $verifiedAt
+     * @return UserInterface
+     * @throws RepositoryUpdateException
+     */
+    public function addVerified(string|int $id, string $channel, DateTimeInterface $verifiedAt): UserInterface
+    {
+        $user = $this->findById($id);
+        
+        if (is_null($user)) {
+            throw new RepositoryUpdateException(
+                message: sprintf('User with the id %s not found', (string) $id)
+            );
+        }
+        
+        $verified = $user->getVerified();
+        $verified[$channel] = $verifiedAt->format('Y-m-d H:i:s');
+        
+        return $this->updateById(
+            id: $id,
+            attributes: ['verified' => $verified],
+        );
+    }
+    
+    /**
+     * Remove a verified channel.
+     *
+     * @param string|int $id The user id.
+     * @param string $channel
+     * @return UserInterface
+     * @throws RepositoryUpdateException
+     */
+    public function removeVerified(string|int $id, string $channel): UserInterface
+    {
+        $user = $this->findById($id);
+        
+        if (is_null($user)) {
+            throw new RepositoryUpdateException(
+                message: sprintf('User with the id %s not found', (string) $id)
+            );
+        }
+        
+        $verified = $user->getVerified();
+        unset($verified[$channel]);
+        
+        return $this->updateById(
+            id: $id,
+            attributes: ['verified' => $verified],
+        );
     }
 }
