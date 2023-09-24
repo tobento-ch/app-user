@@ -20,6 +20,7 @@ use Tobento\App\User\AddressStorageRepository;
 use Tobento\App\User\UserRepositoryInterface;
 use Tobento\Service\Storage\InMemoryStorage;
 use Tobento\Service\Repository\Storage\Column;
+use DateTime;
 use Throwable;
     
 class UserStorageRepositoryTest extends TestCase
@@ -321,4 +322,75 @@ class UserStorageRepositoryTest extends TestCase
         $this->assertSame(0, $repo->findAll()->count());
         $this->assertSame(0, $addressRepo->findAll()->count());
     }
+    
+    public function testAddVerifiedMethod()
+    {
+        $addressRepo = Factory::createAddressRepository();
+        
+        $repo = new UserStorageRepository(
+            storage: new InMemoryStorage([]),
+            table: 'users',
+            userFactory: Factory::createUserFactory(addressRepository: $addressRepo),
+            addressRepository: $addressRepo,
+        );
+        
+        $repo->create(['id' => 5, 'email' => 'tom@example.com']);
+        
+        $updatedUser = $repo->addVerified(
+            id: 5,
+            channel: 'email',
+            verifiedAt: new DateTime('2023-09-24 00:00:00'),
+        );
+        
+        $this->assertSame(5, $updatedUser->id());
+        $this->assertSame(['email' => '2023-09-24 00:00:00'], $updatedUser->getVerified());
+        
+        $user = $repo->findById(5);
+        $this->assertSame(5, $user->id());
+        $this->assertSame(['email' => '2023-09-24 00:00:00'], $user->getVerified());
+        
+        // add new channel:
+        $updatedUser = $repo->addVerified(
+            id: 5,
+            channel: 'smartphone',
+            verifiedAt: new DateTime('2024-09-24 00:00:00'),
+        );
+        
+        $user = $repo->findById(5);
+        $this->assertSame(5, $user->id());
+        $this->assertSame(
+            ['email' => '2023-09-24 00:00:00', 'smartphone' => '2024-09-24 00:00:00'],
+            $user->getVerified()
+        ); 
+    }
+    
+    public function testRemoveVerifiedMethod()
+    {
+        $addressRepo = Factory::createAddressRepository();
+        
+        $repo = new UserStorageRepository(
+            storage: new InMemoryStorage([]),
+            table: 'users',
+            userFactory: Factory::createUserFactory(addressRepository: $addressRepo),
+            addressRepository: $addressRepo,
+        );
+        
+        $repo->create([
+            'id' => 5,
+            'email' => 'tom@example.com',
+            'verified' => ['email' => '2023-09-24 00:00:00', 'smartphone' => '2024-09-24 00:00:00'],
+        ]);
+        
+        $updatedUser = $repo->removeVerified(id: 5, channel: 'email');
+        
+        $user = $repo->findById(5);
+        $this->assertSame(5, $user->id());
+        $this->assertSame(['smartphone' => '2024-09-24 00:00:00'], $user->getVerified());
+        
+        $updatedUser = $repo->removeVerified(id: 5, channel: 'smartphone');
+        
+        $user = $repo->findById(5);
+        $this->assertSame(5, $user->id());
+        $this->assertSame([], $user->getVerified());
+    }    
 }

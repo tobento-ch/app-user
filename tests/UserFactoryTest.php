@@ -186,6 +186,22 @@ class UserFactoryTest extends TestCase
         $this->assertSame([], $user->role()->getPermissions());
     }
     
+    public function testVerifiedAttributeIsSet()
+    {
+        $userFactory = new UserFactory(
+            acl: Factory::createAcl(),
+            addressRepository: Factory::createAddressRepository(),
+            addressFactory: Factory::createAddressFactory(),
+        );
+        
+        $user = $userFactory->createEntityFromArray([
+            'id' => 2,
+            'verified' => ['email' => '2023-09-24 00:00:00'],
+        ]);
+        
+        $this->assertSame(['email' => '2023-09-24 00:00:00'], $user->getVerified());
+    }
+    
     public function testCreateEntitiesFromStorageItemsMethod()
     {
         $userFactory = new UserFactory(
