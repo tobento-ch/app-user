@@ -43,7 +43,10 @@
         "phpunit/phpunit": "^9.5",
         "vimeo/psalm": "^4.0",
         "nyholm/psr7": "^1.4",
-        "tobento/app-event": "^1.0.1"
+        "tobento/app-event": "^1.0.1",
+        "tobento/service-console": "^1.0.1",
+        "tobento/service-container": "^1.0",
+        "mockery/mockery": "^1.6"
     },
     "autoload": {
         "psr-4": {
@@ -53,7 +56,8 @@
     "autoload-dev": {
         "psr-4": {
             "Tobento\\App\\User\\Test\\": "tests",
-            "Tobento\\App\\Http\\Test\\": "vendor/tobento/app-http/tests"
+            "Tobento\\App\\Http\\Test\\": "vendor/tobento/app-http/tests",
+            "Tobento\\Service\\Console\\Test\\": "vendor/tobento/service-console/tests"
         }
     },
     "scripts": {
