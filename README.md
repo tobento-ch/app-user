@@ -44,11 +44,13 @@ User support for the app with authentication and authorization.
     - [Token Storage](#token-storage)
         - [Null Storage](#null-storage)
         - [In Memory Storage](#in-memory-storage)
+        - [Service Storage](#service-storage)
         - [Session Storage](#session-storage)
     - [Token Transport](#token-transport)
         - [Cookie Transport](#cookie-transport)
         - [Header Transport](#header-transport)
     - [Events](#events)
+    - [Commands](#commands)
     - [Migration](#migration)
         - [Role Permissions Action](#role-permissions-action)
     - [Learn More](#learn-more)
@@ -1508,6 +1510,63 @@ return [
 ];
 ```
 
+### Service Storage
+
+The ```ServiceStorage``` uses the [Service Storage](https://github.com/tobento-ch/service-storage) to store tokens.
+
+In ```app/config/user.php``` file:
+
+```php
+use Tobento\App\User\Authentication;
+use Psr\Container\ContainerInterface;
+use Psr\Clock\ClockInterface;
+
+return [    
+    // ...
+
+    'interfaces' => [
+        // ...
+
+        // Define the token storages you wish to support:
+        Authentication\Token\TokenStoragesInterface::class => static function(ContainerInterface $c) {
+            return new Authentication\Token\TokenStorages(
+                // add service storage:
+                new Authentication\Token\ServiceStorage(
+                    clock: $c->get(ClockInterface::class),
+                    storage: $c->get(StorageInterface::class)->new(),
+                    table: 'auth_tokens',
+                ),
+            );
+        },
+        
+        // Define the default token storage used for auth:
+        Authentication\Token\TokenStorageInterface::class => static function(ContainerInterface $c) {
+            // you might change to inmemory:
+            return $c->get(Authentication\Token\TokenStoragesInterface::class)->get('storage:auth_tokens');
+        },
+
+        // ...
+    ],
+
+];
+```
+
+The storage needs to have the following table columns:
+
+| Column | Type | Description |
+| --- | --- | --- |
+| ```id``` | string(64) primary | - |
+| ```token``` | json | Used to store the token |
+| ```expires_at``` | timestamp Null | Used to store the expiration timestamp |
+
+**Delete expired tokens**
+
+You may call the ```deleteExpiredTokens``` method to delete all expired tokens:
+
+```php
+$serviceStorage->deleteExpiredTokens();
+```
+
 ### Session Storage
 
 Stores the token in PHP session.
@@ -1678,6 +1737,21 @@ use Tobento\App\User\Event;
 **Supporting Events**
 
 Simply, install the [App Event](https://github.com/tobento-ch/app-event) bundle.
+
+## Commands
+
+Before using commands, you will need to install the [App Console](https://github.com/tobento-ch/app-console) bundle.
+
+**Delete Expired Tokens**
+
+You may delete expired tokens from token storages supporting it.
+
+```
+php app.php auth:purge-tokens
+
+// or you may delete only from specific token storages:
+php app.php auth:purge-tokens --storage=name
+```
 
 ## Migration
 
