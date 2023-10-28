@@ -51,6 +51,19 @@ final class Token implements TokenInterface
     {
         return $this->id;
     }
+    
+    /**
+     * Returns a new instance with the specified id.
+     *
+     * @param string $id
+     * @return static
+     */
+    public function withId(string $id): static
+    {
+        $new = clone $this;
+        $new->id = $id;
+        return $new;
+    }
 
     /**
      * Returns the payload.
