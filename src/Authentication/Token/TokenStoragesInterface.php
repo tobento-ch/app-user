@@ -34,7 +34,7 @@ interface TokenStoragesInterface
      * @param string $name The token storage name.
      * @param callable $storage
      * @return static $this
-     */    
+     */
     public function register(string $name, callable $storage): static;
     
     /**
@@ -43,7 +43,7 @@ interface TokenStoragesInterface
      * @param string $name The token storage name
      * @return TokenStorageInterface
      * @throws TokenStorageException
-     */    
+     */
     public function get(string $name): TokenStorageInterface;
     
     /**
@@ -51,6 +51,13 @@ interface TokenStoragesInterface
      *
      * @param string $name The token storage name.
      * @return bool
-     */    
+     */
     public function has(string $name): bool;
+    
+    /**
+     * Returns all token storages names.
+     *
+     * @return array
+     */
+    public function names(): array;
 }
