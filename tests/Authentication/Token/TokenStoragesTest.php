@@ -58,4 +58,15 @@ class TokenStoragesTest extends TestCase
         $this->assertTrue($storages->has('null'));
         $this->assertInstanceof(TokenStorageInterface::class, $storages->get('null'));
     }
+    
+    public function testNamesMethod()
+    {
+        $storages = new TokenStorages();
+
+        $storages->register('null', function () {
+            return new NullStorage();
+        });
+        
+        $this->assertSame(['null'], $storages->names());
+    }
 }
