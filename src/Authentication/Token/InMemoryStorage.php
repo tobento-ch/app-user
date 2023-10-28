@@ -138,7 +138,7 @@ final class InMemoryStorage implements TokenStorageInterface
     /**
      * Create a rand hash.
      *
-     * @param int $length
+     * @param positive-int $length
      * @return string
      */
     private function randomHash(int $length): string
