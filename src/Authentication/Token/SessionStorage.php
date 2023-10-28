@@ -22,7 +22,6 @@ use Tobento\App\User\Exception\TokenExpiredException;
 use Tobento\Service\Session\SessionInterface;
 use Psr\Clock\ClockInterface;
 use DateTimeInterface;
-use DateTimeImmutable;
 use Throwable;
 
 /**
@@ -149,7 +148,7 @@ final class SessionStorage implements TokenStorageInterface
     /**
      * Create a rand hash.
      *
-     * @param int $length
+     * @param positive-int $length
      * @return string
      */
     private function randomHash(int $length): string
