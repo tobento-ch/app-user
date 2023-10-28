@@ -57,7 +57,7 @@ class TokenStorages implements TokenStoragesInterface
      * @param string $name The token storage name.
      * @param callable $storage
      * @return static $this
-     */    
+     */
     public function register(string $name, callable $storage): static
     {
         $this->storages[$name] = $storage;
@@ -70,7 +70,7 @@ class TokenStorages implements TokenStoragesInterface
      * @param string $name The token storage name
      * @return TokenStorageInterface
      * @throws TokenStorageException
-     */    
+     */
     public function get(string $name): TokenStorageInterface
     {
         if (!$this->has($name)) {
@@ -93,10 +93,20 @@ class TokenStorages implements TokenStoragesInterface
      *
      * @param string $name The token storage name.
      * @return bool
-     */    
+     */
     public function has(string $name): bool
     {
         return array_key_exists($name, $this->storages);
+    }
+    
+    /**
+     * Returns all token storages names.
+     *
+     * @return array
+     */
+    public function names(): array
+    {
+        return array_keys($this->storages);
     }
     
     /**
