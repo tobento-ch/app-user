@@ -67,4 +67,22 @@ class TokenTest extends TestCase
         $this->assertSame($issuedAt, $token->issuedAt());
         $this->assertSame(null, $token->expiresAt());
     }
+    
+    public function testWithIdMethod()
+    {
+        $token = new Token(
+            id: 'ID',
+            payload: ['userId' => 1],
+            authenticatedVia: 'via',
+            authenticatedBy: null,
+            issuedBy: 'storage',
+            issuedAt: new DateTimeImmutable('now'),
+        );
+        
+        $tokenNew = $token->withId('IDnew');
+        
+        $this->assertFalse($token === $tokenNew);
+        $this->assertSame('ID', $token->id());
+        $this->assertSame('IDnew', $tokenNew->id());
+    }
 }
