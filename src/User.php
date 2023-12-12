@@ -141,18 +141,21 @@ class User extends BaseUser implements UserInterface, Authorizable
      */
     public function toArray(): array
     {
-        $role = $this->role();
-        
         $user = parent::toArray();
         $user['isAuthenticated'] = $this->isAuthenticated();
         $user['verified'] = $this->getVerified();
-        $user['role'] = [
-            'key' => $role->key(),
-            'name' => $role->name(),
-            'active' => $role->active(),
-            'areas' => $role->areas(),
-            'permissions' => $role->getPermissions(),
-        ];
+
+        if ($this->hasRole()) {
+            $role = $this->role();
+            $user['role_key'] = $role->key();
+            $user['role'] = [
+                'key' => $role->key(),
+                'name' => $role->name(),
+                'active' => $role->active(),
+                'areas' => $role->areas(),
+                'permissions' => $role->getPermissions(),
+            ];
+        }
         
         return $user;
     }
