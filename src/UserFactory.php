@@ -52,7 +52,15 @@ class UserFactory extends EntityFactory implements UserFactoryInterface
             $addresses = $this->addressFactory->createAddresses($data->get('addresses'));
         } else {
             // load primary address:
-            $address = $this->addressRepository->findPrimaryByUserId($data->get('id', 0));
+            if ($data->has('address')) {
+                $address = $data->get('address', []);
+                $address['key'] = 'primary';
+                $address['user_id'] ??= $data->get('id', 0);
+                $address = [$address];
+            } else {
+                $address = $this->addressRepository->findPrimaryByUserId($data->get('id', 0));
+            }
+            
             $addresses = $this->addressFactory->createAddresses($address);
         }
         
