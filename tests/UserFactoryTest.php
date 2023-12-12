@@ -100,6 +100,38 @@ class UserFactoryTest extends TestCase
 
         $this->assertSame('Tom', $user->address()->firstname());
     }
+    
+    public function testPrimaryAddressDefinedIsUsed()
+    {
+        $userFactory = new UserFactory(
+            acl: Factory::createAcl(),
+            addressRepository: Factory::createAddressRepository(),
+            addressFactory: Factory::createAddressFactory(),
+        );
+        
+        $user = $userFactory->createEntityFromArray([
+            'id' => 2,
+            'email' => 'tom@example.com',
+            'address' => [
+                'firstname' => 'Tom',
+            ],
+        ]);
+
+        $this->assertSame('Tom', $user->address()->firstname());
+        $this->assertSame(2, $user->address()->userId());
+        
+        $user = $userFactory->createEntityFromArray([
+            'id' => 2,
+            'email' => 'tom@example.com',
+            'address' => [
+                'firstname' => 'Tom',
+                'user_id' => 5,
+            ],
+        ]);
+
+        $this->assertSame('Tom', $user->address()->firstname());
+        $this->assertSame(5, $user->address()->userId());        
+    }    
         
     public function testGuestRoleIsAssignedIfNone()
     {
