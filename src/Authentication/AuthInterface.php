@@ -64,4 +64,11 @@ interface AuthInterface
      * @return null|AuthenticatedInterface
      */
     public function getAuthenticated(): null|AuthenticatedInterface;
+    
+    /**
+     * Returns the unauthenticated or null if none.
+     *
+     * @return null|AuthenticatedInterface
+     */
+    public function getUnauthenticated(): null|AuthenticatedInterface;
 }

@@ -37,6 +37,11 @@ class Auth implements AuthInterface
     protected null|AuthenticatedInterface $authenticated = null;
     
     /**
+     * @var null|AuthenticatedInterface
+     */
+    protected null|AuthenticatedInterface $unauthenticated = null;
+    
+    /**
      * @var bool
      */
     protected bool $closed = false;
@@ -69,6 +74,7 @@ class Auth implements AuthInterface
         if ($this->hasAuthenticated()) {
             $this->getAuthenticated()->user()->setAuthenticated(false);
             $this->eventDispatcher?->dispatch(new Event\Unauthenticated($this->getAuthenticated()));
+            $this->unauthenticated = $this->authenticated;
             $this->authenticated = null;
         }
     }
@@ -111,5 +117,15 @@ class Auth implements AuthInterface
     public function getAuthenticated(): null|AuthenticatedInterface
     {
         return $this->authenticated;
+    }
+    
+    /**
+     * Returns the unauthenticated or null if none.
+     *
+     * @return null|AuthenticatedInterface
+     */
+    public function getUnauthenticated(): null|AuthenticatedInterface
+    {
+        return $this->unauthenticated;
     }
 }
