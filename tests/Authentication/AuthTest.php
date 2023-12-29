@@ -46,6 +46,7 @@ class AuthTest extends TestCase
         
         $this->assertFalse($auth->hasAuthenticated());
         $this->assertNull($auth->getAuthenticated());
+        $this->assertNull($auth->getUnauthenticated());
         $this->assertFalse($auth->isClosed());
         
         $auth->start(
@@ -56,10 +57,12 @@ class AuthTest extends TestCase
         $this->assertTrue($auth->hasAuthenticated());
         $this->assertTrue($authenticated === $auth->getAuthenticated());
         $this->assertTrue($auth->getAuthenticated()->user()->isAuthenticated());
+        $this->assertNull($auth->getUnauthenticated());
         $this->assertFalse($auth->isClosed());
         
         $auth->close();
         
+        $this->assertNotNull($auth->getUnauthenticated());
         $this->assertFalse($auth->hasAuthenticated());
         $this->assertNull($auth->getAuthenticated());
         $this->assertFalse($authenticated->user()->isAuthenticated());
