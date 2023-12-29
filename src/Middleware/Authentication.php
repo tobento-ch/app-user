@@ -81,18 +81,19 @@ class Authentication implements MiddlewareInterface
         // Handle the response:
         $response = $handler->handle($request);
         
-        if (! $this->auth->hasAuthenticated()) {
-            return $response;
-        }
-        
-        if ($this->auth->isClosed()) {
-            $this->tokenStorage->deleteToken($this->auth->getAuthenticated()->token());
+        if ($this->auth->isClosed() && $this->auth->getUnauthenticated()) {
+            
+            $this->tokenStorage->deleteToken($this->auth->getUnauthenticated()->token());
 
             return $this->tokenTransport->removeToken(
-                token: $this->auth->getAuthenticated()->token(),
+                token: $this->auth->getUnauthenticated()->token(),
                 request: $request,
                 response: $response,
             );
+        }
+        
+        if (! $this->auth->hasAuthenticated()) {
+            return $response;
         }
         
         return $this->tokenTransport->commitToken(
