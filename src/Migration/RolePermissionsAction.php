@@ -30,12 +30,14 @@ class RolePermissionsAction implements ActionInterface
      * @param null|array $add
      * @param null|array $remove
      * @param string $description
+     * @param string $type A type of the action.
      */
     public function __construct(
         protected RoleRepositoryInterface $roleRepository,
         protected null|array $add = null,
         protected null|array $remove = null,
         protected string $description = '',
+        protected string $type = 'database',
     ) {}
     
     /**
@@ -56,6 +58,16 @@ class RolePermissionsAction implements ActionInterface
     public function description(): string
     {
         return $this->description;
+    }
+    
+    /**
+     * Returns the type of the action.
+     *
+     * @return string
+     */
+    public function type(): string
+    {
+        return $this->type;
     }
     
     /**
