@@ -30,11 +30,10 @@ return [
     */
     
     'migrations' => [
-        // User, address and role repository migration.
-        // It will create database tables depending on its storage
+        // Creates database tables depending on its storage
         // implemenation specified on the interfaces below.
-        \Tobento\App\User\Migration\StorageRepositories::class,
-        
+        \Tobento\App\User\Migration\RoleRepository::class,
+        \Tobento\App\User\Migration\UserRepositories::class,
         \Tobento\App\User\Migration\AuthenticationTokenRepository::class,
     ],
     
