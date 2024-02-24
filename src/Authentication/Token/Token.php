@@ -144,6 +144,25 @@ final class Token implements TokenInterface
     }
     
     /**
+     * Returns a new instance created from the specified array data.
+     *
+     * @param array $data
+     * @return static
+     * @throws \Throwable
+     * @psalm-suppress TooFewArguments
+     */
+    public static function fromArray(array $data): static
+    {
+        $data['issuedAt'] = (new DateTimeImmutable())->setTimestamp($data['issuedAt']);
+        
+        if ($data['expiresAt'] !== null) {
+            $data['expiresAt'] = (new DateTimeImmutable())->setTimestamp($data['expiresAt']);
+        }
+        
+        return new static(...$data);
+    }
+    
+    /**
      * Returns a new instance created from the specified JSON string.
      *
      * @param string $json
@@ -152,14 +171,6 @@ final class Token implements TokenInterface
      */
     public static function fromJsonString(string $json): static
     {
-        $data = json_decode($json, true);
-        
-        $data['issuedAt'] = (new DateTimeImmutable())->setTimestamp($data['issuedAt']);
-        
-        if ($data['expiresAt'] !== null) {
-            $data['expiresAt'] = (new DateTimeImmutable())->setTimestamp($data['expiresAt']);
-        }
-        
-        return new static(...$data);
-    }    
+        return static::fromArray(json_decode($json, true));
+    }
 }
