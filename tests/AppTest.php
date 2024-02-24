@@ -180,6 +180,68 @@ class AppTest extends TestCase
             ->isBodySame('{"authenticated":true}');
     }
     
+    public function testAuthenticateUserWithRepositoryStorage()
+    {
+        $app = $this->createApp();
+        $app->boot(\Tobento\App\Http\Boot\Middleware::class);
+        $app->boot(\Tobento\App\Http\Boot\Routing::class);
+        $app->boot(\Tobento\App\Http\Boot\Session::class);
+        $app->boot(\Tobento\App\User\Boot\User::class);
+        
+        $app->on(ServerRequestInterface::class, function() {
+            return (new Psr17Factory())->createServerRequest(
+                method: 'POST',
+                uri: 'login',
+                serverParams: [],
+            );
+        });
+        
+        // Replaces session middleware to ignore session start and save exceptions.
+        $app->on(Middleware::class, MiddlewareBoot::class);
+        
+        // Create user:
+        $app->on(UserRepositoryInterface::class, function($repo) {
+            $repo->create(['id' => 5, 'username' => 'tom']);
+        });
+        
+        $app->booting();
+        
+        $app->route('POST', 'login', function(
+            ServerRequestInterface $request,
+            UserRepositoryInterface $userRepository,
+            AuthInterface $auth,
+            TokenStorageInterface $tokenStorage,
+        ) {
+            // authenticate user manually:
+            $user = $userRepository->findById(5);
+
+            if (is_null($user)) {
+                return 'UserNotFound';
+            }
+
+            // create token and start auth:
+            $token = $tokenStorage->createToken(
+                // Set the payload:
+                payload: ['userId' => $user->id()],
+                authenticatedVia: 'login.auth',
+                authenticatedBy: null,
+                issuedAt: new \DateTimeImmutable('now'),
+                expiresAt: new \DateTimeImmutable('now +10 minutes'),
+            );
+
+            $auth->start(new Authenticated(token: $token, user: $user));
+
+            // create and return response:
+            return 'Authenticated';
+        });
+
+        $app->run();
+
+        (new TestResponse($app->get(Http::class)->getResponse()))
+            ->isStatusCode(200)
+            ->isBodySame('Authenticated');
+    }
+    
     public function testAuthenticateUserWithSessionStorage()
     {
         $app = $this->createApp();

@@ -18,7 +18,8 @@ use Tobento\Service\Console\Test\TestCommand;
 use Tobento\App\User\Console\DeleteExpiredTokensCommand;
 use Tobento\App\User\Authentication\Token\TokenStoragesInterface;
 use Tobento\App\User\Authentication\Token\TokenStorages;
-use Tobento\App\User\Authentication\Token\ServiceStorage;
+use Tobento\App\User\Authentication\Token\RepositoryStorage;
+use Tobento\App\User\Authentication\Token\TokenRepository;
 use Tobento\App\User\Authentication\Token\InMemoryStorage as TokenInMemoryStorage;
 use Tobento\Service\Storage\InMemoryStorage;
 use Tobento\Service\Container\Container;
@@ -31,22 +32,28 @@ class DeleteExpiredTokensCommandTest extends TestCase
         $container = new Container();
         $container->set(TokenStoragesInterface::class, function() {
             return new TokenStorages(
-                new ServiceStorage(
+                new RepositoryStorage(
                     clock: new FrozenClock(),
-                    storage: new InMemoryStorage([]),
-                    table: 'tokens_foo',
+                    repository: new TokenRepository(
+                        storage: new InMemoryStorage([]),
+                        table: 'tokens_foo',
+                    ),
+                    name: 'repo:foo',
                 ),
-                new ServiceStorage(
+                new RepositoryStorage(
                     clock: new FrozenClock(),
-                    storage: new InMemoryStorage([]),
-                    table: 'tokens_bar',
+                    repository: new TokenRepository(
+                        storage: new InMemoryStorage([]),
+                        table: 'tokens_bar',
+                    ),
+                    name: 'repo:bar',
                 ),
             );
         });
         
         (new TestCommand(command: DeleteExpiredTokensCommand::class))
-            ->expectsOutput('deleted expired tokens from storage:tokens_foo storage')
-            ->expectsOutput('deleted expired tokens from storage:tokens_bar storage')
+            ->expectsOutput('deleted expired tokens from repo:foo storage')
+            ->expectsOutput('deleted expired tokens from repo:bar storage')
             ->expectsExitCode(0)
             ->execute($container);
     }
@@ -73,15 +80,21 @@ class DeleteExpiredTokensCommandTest extends TestCase
         $container = new Container();
         $container->set(TokenStoragesInterface::class, function() {
             return new TokenStorages(
-                new ServiceStorage(
+                new RepositoryStorage(
                     clock: new FrozenClock(),
-                    storage: new InMemoryStorage([]),
-                    table: 'tokens_foo',
+                    repository: new TokenRepository(
+                        storage: new InMemoryStorage([]),
+                        table: 'tokens_foo',
+                    ),
+                    name: 'repo:foo',
                 ),
-                new ServiceStorage(
+                new RepositoryStorage(
                     clock: new FrozenClock(),
-                    storage: new InMemoryStorage([]),
-                    table: 'tokens_bar',
+                    repository: new TokenRepository(
+                        storage: new InMemoryStorage([]),
+                        table: 'tokens_bar',
+                    ),
+                    name: 'repo:bar',
                 ),
             );
         });
@@ -89,11 +102,11 @@ class DeleteExpiredTokensCommandTest extends TestCase
         (new TestCommand(
             command: DeleteExpiredTokensCommand::class,
             input: [
-                '--storage' => ['storage:tokens_foo'],
+                '--storage' => ['repo:foo'],
             ],
         ))
-        ->expectsOutput('deleted expired tokens from storage:tokens_foo storage')
-        ->doesntExpectOutputToContain('storage:tokens_bar')
+        ->expectsOutput('deleted expired tokens from repo:foo storage')
+        ->doesntExpectOutputToContain('repo:bar')
         ->expectsExitCode(0)
         ->execute($container);
     }
