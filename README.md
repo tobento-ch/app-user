@@ -44,7 +44,7 @@ User support for the app with authentication and authorization.
     - [Token Storage](#token-storage)
         - [Null Storage](#null-storage)
         - [In Memory Storage](#in-memory-storage)
-        - [Service Storage](#service-storage)
+        - [Repository Storage](#repository-storage)
         - [Session Storage](#session-storage)
     - [Token Transport](#token-transport)
         - [Cookie Transport](#cookie-transport)
@@ -105,8 +105,6 @@ $app->run();
 ### User Config
 
 The configuration for the user is located in the ```app/config/user.php``` file at the default App Skeleton config location.
-
-**You will need to define a [Token Storage](#token-storage) you wish to use as by default the [Null Storage](#null-storage) is specified.**
 
 ### User Repositories And Factories
 
@@ -1510,14 +1508,15 @@ return [
 ];
 ```
 
-### Service Storage
+### Repository Storage
 
-The ```ServiceStorage``` uses the [Service Storage](https://github.com/tobento-ch/service-storage) to store tokens.
+The ```RepositoryStorage``` uses the [Service Repository Storage](https://github.com/tobento-ch/service-repository-storage) to store tokens.
 
 In ```app/config/user.php``` file:
 
 ```php
 use Tobento\App\User\Authentication;
+use Tobento\Service\Storage\StorageInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Clock\ClockInterface;
 
@@ -1530,19 +1529,20 @@ return [
         // Define the token storages you wish to support:
         Authentication\Token\TokenStoragesInterface::class => static function(ContainerInterface $c) {
             return new Authentication\Token\TokenStorages(
-                // add service storage:
-                new Authentication\Token\ServiceStorage(
+                new Authentication\Token\RepositoryStorage(
                     clock: $c->get(ClockInterface::class),
-                    storage: $c->get(StorageInterface::class)->new(),
-                    table: 'auth_tokens',
+                    repository: new Authentication\Token\TokenRepository(
+                        storage: $c->get(StorageInterface::class)->new(),
+                        table: 'auth_tokens',
+                    ),
+                    name: 'repository',
                 ),
             );
         },
         
         // Define the default token storage used for auth:
         Authentication\Token\TokenStorageInterface::class => static function(ContainerInterface $c) {
-            // you might change to inmemory:
-            return $c->get(Authentication\Token\TokenStoragesInterface::class)->get('storage:auth_tokens');
+            return $c->get(Authentication\Token\TokenStoragesInterface::class)->get('repository');
         },
 
         // ...
@@ -1551,20 +1551,12 @@ return [
 ];
 ```
 
-The storage needs to have the following table columns:
-
-| Column | Type | Description |
-| --- | --- | --- |
-| ```id``` | string(64) primary | - |
-| ```token``` | json | Used to store the token |
-| ```expires_at``` | timestamp Null | Used to store the expiration timestamp |
-
 **Delete expired tokens**
 
 You may call the ```deleteExpiredTokens``` method to delete all expired tokens:
 
 ```php
-$serviceStorage->deleteExpiredTokens();
+$repositoryStorage->deleteExpiredTokens();
 ```
 
 ### Session Storage
