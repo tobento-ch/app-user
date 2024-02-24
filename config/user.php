@@ -34,6 +34,8 @@ return [
         // It will create database tables depending on its storage
         // implemenation specified on the interfaces below.
         \Tobento\App\User\Migration\StorageRepositories::class,
+        
+        \Tobento\App\User\Migration\AuthenticationTokenRepository::class,
     ],
     
     /*
@@ -90,13 +92,20 @@ return [
         // Define the token storages you wish to support:
         Authentication\Token\TokenStoragesInterface::class => static function(ContainerInterface $c) {
             return new Authentication\Token\TokenStorages(
-                new Authentication\Token\NullStorage(),
+                new Authentication\Token\RepositoryStorage(
+                    clock: $c->get(ClockInterface::class),
+                    repository: new Authentication\Token\TokenRepository(
+                        storage: $c->get(StorageInterface::class)->new(),
+                        table: 'auth_tokens',
+                    ),
+                    name: 'repository',
+                ),
             );
         },
         
         // Define the default token storage used for auth:
         Authentication\Token\TokenStorageInterface::class => static function(ContainerInterface $c) {
-            return $c->get(Authentication\Token\TokenStoragesInterface::class)->get('null');
+            return $c->get(Authentication\Token\TokenStoragesInterface::class)->get('repository');
         },
         
         // Define the token transport you wish to support:
