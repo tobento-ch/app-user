@@ -68,7 +68,7 @@ class HttpUserErrorHandler extends ErrorHandler
                 }
             }
  
-            if (!empty($redirectUri)) {
+            if (!is_null($redirectUri)) {
                 if (!empty($t->getMessage())) {
                     $responser->messages()->add($t->messageLevel(), $t->getMessage());
                 }
