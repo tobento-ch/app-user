@@ -17,6 +17,7 @@ use Tobento\Service\Repository\RepositoryInterface;
 use Tobento\Service\Repository\RepositoryCreateException;
 use Tobento\Service\Repository\RepositoryUpdateException;
 use Tobento\Service\Repository\RepositoryDeleteException;
+use DateTimeInterface;
 
 /**
  * UserRepositoryInterface
@@ -64,4 +65,25 @@ interface UserRepositoryInterface extends RepositoryInterface
      * @throws RepositoryDeleteException
      */
     public function deleteWithAddresses(string|int $id): UserInterface;
+    
+    /**
+     * Add a verified channel.
+     *
+     * @param string|int $id The user id.
+     * @param string $channel
+     * @param DateTimeInterface $verifiedAt
+     * @return UserInterface
+     * @throws RepositoryUpdateException
+     */
+    public function addVerified(string|int $id, string $channel, DateTimeInterface $verifiedAt): UserInterface;
+    
+    /**
+     * Remove a verified channel.
+     *
+     * @param string|int $id The user id.
+     * @param string $channel
+     * @return UserInterface
+     * @throws RepositoryUpdateException
+     */
+    public function removeVerified(string|int $id, string $channel): UserInterface;
 }
