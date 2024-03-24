@@ -77,6 +77,7 @@ class UserStorageRepository extends StorageRepository implements UserRepositoryI
             Column\Boolean::new('newsletter'),
             Column\Json::new('permissions'),
             Column\Json::new('verified'),
+            Column\Json::new('settings'),
         ];
     }
     
