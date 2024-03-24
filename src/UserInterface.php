@@ -73,4 +73,12 @@ interface UserInterface extends BaseUserInterface, Authorizable
      * @return bool
      */
     public function isOneVerified(null|array $channels = null): bool;
+    
+    /**
+     * Returns a setting value by name.
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function setting(string $name, mixed $default): mixed;
 }
