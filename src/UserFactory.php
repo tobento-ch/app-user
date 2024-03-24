@@ -109,6 +109,9 @@ class UserFactory extends EntityFactory implements UserFactoryInterface
         // Verified:
         $user->setVerified($data->get('verified', []));
         
+        // Settings:
+        $user->setSettings($data->get('settings', []));
+        
         return $user;
     }
     
