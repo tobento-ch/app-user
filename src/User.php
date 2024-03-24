@@ -35,6 +35,11 @@ class User extends BaseUser implements UserInterface, Authorizable
     protected array $verified = [];
     
     /**
+     * @var array<string, mixed>
+     */
+    protected array $settings = [];
+    
+    /**
      * Set if the user is authenticated.
      *
      * @param bool $isAuthenticated
@@ -133,6 +138,29 @@ class User extends BaseUser implements UserInterface, Authorizable
         
         return false;
     }
+    
+    /**
+     * Sets the user settings.
+     *
+     * @param array<string, mixed> $settings
+     * @return static $this
+     */
+    public function setSettings(array $settings): static
+    {
+        $this->settings = $settings;
+        return $this;
+    }
+    
+    /**
+     * Returns a setting value by name.
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function setting(string $name, mixed $default): mixed
+    {
+        return $this->settings[$name] ?? $default;
+    }
 
     /**
      * Object to array
@@ -144,6 +172,7 @@ class User extends BaseUser implements UserInterface, Authorizable
         $user = parent::toArray();
         $user['isAuthenticated'] = $this->isAuthenticated();
         $user['verified'] = $this->getVerified();
+        $user['settings'] = $this->settings;
 
         if ($this->hasRole()) {
             $role = $this->role();
