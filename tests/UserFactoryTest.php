@@ -234,6 +234,22 @@ class UserFactoryTest extends TestCase
         $this->assertSame(['email' => '2023-09-24 00:00:00'], $user->getVerified());
     }
     
+    public function testSettingsAreSet()
+    {
+        $userFactory = new UserFactory(
+            acl: Factory::createAcl(),
+            addressRepository: Factory::createAddressRepository(),
+            addressFactory: Factory::createAddressFactory(),
+        );
+        
+        $user = $userFactory->createEntityFromArray([
+            'id' => 2,
+            'settings' => ['foo' => 'Foo'],
+        ]);
+        
+        $this->assertSame('Foo', $user->setting('foo', 'Default'));
+    }
+    
     public function testCreateEntitiesFromStorageItemsMethod()
     {
         $userFactory = new UserFactory(
