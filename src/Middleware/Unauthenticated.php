@@ -29,12 +29,16 @@ class Unauthenticated implements MiddlewareInterface
     /**
      * Create a new Unauthenticated.
      *
+     * @param null|string $via
+     * @param null|string $exceptVia
      * @param string $message
      * @param string $messageLevel
      * @param null|string $redirectUri
      * @param null|string $redirectRoute
      */
     public function __construct(
+        protected null|string $via = null,
+        protected null|string $exceptVia = null,
         protected string $message = '',
         protected string $messageLevel = 'notice',
         protected null|string $redirectUri = null,
@@ -52,16 +56,39 @@ class Unauthenticated implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $auth = $request->getAttribute(AuthInterface::class);
-
-        if (! $auth?->hasAuthenticated()) {
-            return $handler->handle($request);
+        $authenticated = $auth?->getAuthenticated();
+        
+        if (
+            !is_null($authenticated)
+            && !$this->isAuthorized($authenticated)
+        ) {
+            throw new AuthorizationException(
+                message: $this->message,
+                messageLevel: $this->messageLevel,
+                redirectUri: $this->redirectUri,
+                redirectRoute: $this->redirectRoute,
+            );
         }
         
-        throw new AuthorizationException(
-            message: $this->message,
-            messageLevel: $this->messageLevel,
-            redirectUri: $this->redirectUri,
-            redirectRoute: $this->redirectRoute,
-        );
+        return $handler->handle($request);
+    }
+    
+    /**
+     * Returns true if the authenticated is authorized otherwise false.
+     *
+     * @param AuthenticatedInterface $authenticated
+     * @return bool
+     */
+    protected function isAuthorized(AuthenticatedInterface $authenticated): bool
+    {
+        if (!is_null($this->via)) {
+            return in_array($authenticated->via(), explode('|', $this->via));
+        }
+        
+        if (!is_null($this->exceptVia)) {
+            return !in_array($authenticated->via(), explode('|', $this->exceptVia));
+        }
+        
+        return false;
     }
 }
