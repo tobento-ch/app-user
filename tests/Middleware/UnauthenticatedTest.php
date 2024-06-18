@@ -112,6 +112,138 @@ class UnauthenticatedTest extends TestCase
         $response = $md->handle($request);
     }
     
+    public function testIsAuthorizedWhenViaDoesMatch()
+    {
+        $md = $this->createMiddlewareDispatcher();
+        
+        $md->add(new Unauthenticated(via: 'remember|loginlink'));
+        
+        $request = (new Psr17Factory())->createServerRequest(
+            method: 'GET',
+            uri: 'foo',
+        );
+        
+        $authenticated = new AuthenticatedUser(
+            token: new Token(
+                id: 'ID',
+                payload: [],
+                authenticatedVia: 'remember',
+                authenticatedBy: null,
+                issuedBy: 'storage',
+                issuedAt: new DateTimeImmutable('now'),
+            ),
+            user: new User(id: 1),
+        );
+        
+        $auth = new Auth();
+        $auth->start(authenticated: $authenticated);
+        
+        $request = $request->withAttribute(AuthInterface::class, $auth);
+
+        $response = $md->handle($request);
+        
+        $this->assertTrue(true);
+    }
+    
+    public function testFailsIfAuthenticatedViaDoesNotMatch()
+    {
+        $this->expectException(AuthorizationException::class);
+        
+        $md = $this->createMiddlewareDispatcher();
+        
+        $md->add(new Unauthenticated(via: 'remember|loginlink'));
+        
+        $request = (new Psr17Factory())->createServerRequest(
+            method: 'GET',
+            uri: 'foo',
+        );
+        
+        $authenticated = new AuthenticatedUser(
+            token: new Token(
+                id: 'ID',
+                payload: [],
+                authenticatedVia: 'foo',
+                authenticatedBy: null,
+                issuedBy: 'storage',
+                issuedAt: new DateTimeImmutable('now'),
+            ),
+            user: new User(id: 1),
+        );
+        
+        $auth = new Auth();
+        $auth->start(authenticated: $authenticated);
+        
+        $request = $request->withAttribute(AuthInterface::class, $auth);
+
+        $response = $md->handle($request);
+    }
+    
+    public function testIsAuthorizedWhenExceptViaDoesNotMatch()
+    {
+        $md = $this->createMiddlewareDispatcher();
+        
+        $md->add(new Unauthenticated(exceptVia: 'remember|loginlink'));
+        
+        $request = (new Psr17Factory())->createServerRequest(
+            method: 'GET',
+            uri: 'foo',
+        );
+        
+        $authenticated = new AuthenticatedUser(
+            token: new Token(
+                id: 'ID',
+                payload: [],
+                authenticatedVia: 'something',
+                authenticatedBy: null,
+                issuedBy: 'storage',
+                issuedAt: new DateTimeImmutable('now'),
+            ),
+            user: new User(id: 1),
+        );
+        
+        $auth = new Auth();
+        $auth->start(authenticated: $authenticated);
+        
+        $request = $request->withAttribute(AuthInterface::class, $auth);
+
+        $response = $md->handle($request);
+        
+        $this->assertTrue(true);
+    }
+    
+    public function testFailsIfAuthenticatedExceptViaDoesMatch()
+    {
+        $this->expectException(AuthorizationException::class);
+        
+        $md = $this->createMiddlewareDispatcher();
+        
+        $md->add(new Unauthenticated(exceptVia: 'remember|loginlink'));
+        
+        $request = (new Psr17Factory())->createServerRequest(
+            method: 'GET',
+            uri: 'foo',
+        );
+        
+        $authenticated = new AuthenticatedUser(
+            token: new Token(
+                id: 'ID',
+                payload: [],
+                authenticatedVia: 'remember',
+                authenticatedBy: null,
+                issuedBy: 'storage',
+                issuedAt: new DateTimeImmutable('now'),
+            ),
+            user: new User(id: 1),
+        );
+        
+        $auth = new Auth();
+        $auth->start(authenticated: $authenticated);
+        
+        $request = $request->withAttribute(AuthInterface::class, $auth);
+
+        $response = $md->handle($request);
+    }
+    
     public function testAttributesGetsPassedToException()
     {
         $md = $this->createMiddlewareDispatcher();
