@@ -138,6 +138,8 @@ class UserFactory extends EntityFactory implements UserFactoryInterface
      */
     public function createGuestUser(): UserInterface
     {
-        return $this->createEntityFromArray(['role_key' => 'guest']);
+        // add empty addresses as to avoid fetching addresses
+        // from the address repository in the createEntityFromArray method!
+        return $this->createEntityFromArray(['role_key' => 'guest', 'addresses' => []]);
     }
 }
