@@ -947,6 +947,12 @@ $app->route('GET', 'login', function() {
 })->middleware([
     Unauthenticated::class,
     
+    // you may allow access only to user authenticated via:
+    'via' => 'remembered|loginlink',
+    
+    // or you may allow access only to user authenticated except via:
+    'exceptVia' => 'remembered|loginlink',
+    
     // you may specify a custom message to show to the user:
     'message' => 'Already authenticated!',
     
