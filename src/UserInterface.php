@@ -13,13 +13,14 @@ declare(strict_types=1);
 
 namespace Tobento\App\User;
 
+use Tobento\Service\User\Addressable;
 use Tobento\Service\User\UserInterface as BaseUserInterface;
 use Tobento\Service\Acl\Authorizable;
 
 /**
  * UserInterface
  */
-interface UserInterface extends BaseUserInterface, Authorizable
+interface UserInterface extends BaseUserInterface, Authorizable, Addressable
 {
     /**
      * Set if the user is authenticated.
