@@ -253,6 +253,6 @@ class HttpUserErrorHandlerTest extends TestCase
 
         (new TestResponse($app->get(Http::class)->getResponse()))
             ->isStatusCode(302)
-            ->hasHeader('location', '/login');
+            ->hasHeader('location', 'login');
     }
 }
