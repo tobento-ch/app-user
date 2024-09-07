@@ -31,6 +31,7 @@ use Tobento\App\User\Authenticator\TokenAuthenticatorInterface;
 use Tobento\App\User\Authenticator\UserVerifierInterface;
 use Tobento\App\AppInterface;
 use Tobento\App\AppFactory;
+use Tobento\Service\Console\ConsoleInterface;
 use Tobento\Service\Filesystem\Dir;
 
 class UserTest extends TestCase
@@ -81,5 +82,16 @@ class UserTest extends TestCase
         $this->assertInstanceof(TokenTransportInterface::class, $app->get(TokenTransportInterface::class));
         $this->assertInstanceof(TokenAuthenticatorInterface::class, $app->get(TokenAuthenticatorInterface::class));
         $this->assertInstanceof(UserVerifierInterface::class, $app->get(UserVerifierInterface::class));
+    }
+    
+    public function testConsoleCommandsAreAvailable()
+    {
+        $app = $this->createApp();
+        $app->boot(User::class);
+        $app->boot(\Tobento\App\Console\Boot\Console::class);
+        $app->booting();
+        
+        $console = $app->get(ConsoleInterface::class);
+        $this->assertTrue($console->hasCommand('auth:purge-tokens'));
     }
 }

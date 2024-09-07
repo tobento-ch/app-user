@@ -21,6 +21,7 @@ use Tobento\Service\Acl\AclInterface;
 use Tobento\Service\Acl\Rule;
 use Tobento\App\AppInterface;
 use Tobento\App\AppFactory;
+use Tobento\Service\Console\ConsoleInterface;
 use Tobento\Service\Filesystem\Dir;
 
 class AclTest extends TestCase
@@ -105,5 +106,31 @@ class AclTest extends TestCase
         $this->assertInstanceof(Rule::class, $rule);
         
         $this->assertTrue(isset($app->get(AclInterface::class)->getRules()['articles.read']));
+    }
+    
+    public function testAclIsAvailableFromBoot()
+    {
+        $app = $this->createApp();
+        
+        $acl = $app->set(RoleRepositoryInterface::class, Factory::createRoleRepository(roles: [
+            ['key' => 'editor'],
+        ]));
+        
+        $app->boot(Acl::class);
+        $app->booting();
+        
+        $this->assertInstanceof(AclInterface::class, $app->get(Acl::class)->acl());
+    }
+    
+    public function testConsoleCommandsAreAvailable()
+    {
+        $app = $this->createApp();
+        $app->boot(Acl::class);
+        $app->boot(\Tobento\App\Console\Boot\Console::class);
+        $app->booting();
+        
+        $console = $app->get(ConsoleInterface::class);
+        $this->assertTrue($console->hasCommand('acl:roles'));
+        $this->assertTrue($console->hasCommand('acl:rules'));
     }
 }
