@@ -23,6 +23,7 @@ use Tobento\App\Validation\Boot\Validator;
 use Tobento\App\Country\Boot\Country;
 use Tobento\App\User\Authentication\Token\TokenTransportsInterface;
 use Tobento\Service\Cookie\CookiesProcessorInterface;
+use Tobento\Service\Console\ConsoleInterface;
 
 /**
  * User
@@ -91,6 +92,11 @@ class User extends Boot
             if ($transports->has('cookie')) {
                 $processor->whitelistCookie(name: $transports->get('cookie')->cookieName());
             }
+        });
+        
+        // console commands:
+        $this->app->on(ConsoleInterface::class, static function(ConsoleInterface $console): void {
+            $console->addCommand(\Tobento\App\User\Console\DeleteExpiredTokensCommand::class);
         });
     }
 }
