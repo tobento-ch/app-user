@@ -20,6 +20,7 @@ use Tobento\Service\Acl\AclInterface;
 use Tobento\Service\Acl\Acl as AclService;
 use Tobento\Service\Acl\Role;
 use Tobento\Service\Acl\Rule;
+use Tobento\Service\Console\ConsoleInterface;
 
 /**
  * Acl
@@ -62,6 +63,12 @@ class Acl extends Boot
             return $acl;
         });
         
+        // console commands:
+        $this->app->on(ConsoleInterface::class, static function(ConsoleInterface $console): void {
+            $console->addCommand(\Tobento\App\User\Console\AclRolesCommand::class);
+            $console->addCommand(\Tobento\App\User\Console\AclRulesCommand::class);
+        });
+        
         $functions->register($this->app->dir('vendor').'tobento/service-acl/src/functions.php');
     }
 
@@ -74,5 +81,15 @@ class Acl extends Boot
     public function rule(string $key): Rule
     {
         return $this->app->get(AclInterface::class)->rule($key);
+    }
+    
+    /**
+     * Returns the acl.
+     *
+     * @return AclInterface
+     */
+    public function acl(): AclInterface
+    {
+        return $this->app->get(AclInterface::class);
     }
 }
