@@ -50,7 +50,10 @@ User support for the app with authentication and authorization.
         - [Cookie Transport](#cookie-transport)
         - [Header Transport](#header-transport)
     - [Events](#events)
-    - [Commands](#commands)
+    - [Console](#console)
+        - [Acl Roles Command](#acl-roles-command)
+        - [Acl Rules Command](#acl-rules-command)
+        - [Delete Expired Tokens Command](#delete-expired-tokens-command)
     - [Migration](#migration)
         - [Role Permissions Action](#role-permissions-action)
     - [Learn More](#learn-more)
@@ -1736,19 +1739,38 @@ use Tobento\App\User\Event;
 
 Simply, install the [App Event](https://github.com/tobento-ch/app-event) bundle.
 
-## Commands
+## Console
 
 Before using commands, you will need to install the [App Console](https://github.com/tobento-ch/app-console) bundle.
 
-**Delete Expired Tokens**
+### Acl Roles Command
+
+List all acl roles:
+
+```
+php ap acl:roles
+```
+
+### Acl Rules Command
+
+List all acl rules:
+
+```
+php ap acl:rules
+```
+
+### Delete Expired Tokens Command
 
 You may delete expired tokens from token storages supporting it.
 
 ```
-php app.php auth:purge-tokens
+php ap auth:purge-tokens
+```
 
-// or you may delete only from specific token storages:
-php app.php auth:purge-tokens --storage=name
+You may delete only from specific token storages:
+
+```
+php ap auth:purge-tokens --storage=name
 ```
 
 ## Migration
