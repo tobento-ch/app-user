@@ -43,6 +43,7 @@
         "phpunit/phpunit": "^9.5",
         "vimeo/psalm": "^4.0",
         "nyholm/psr7": "^1.4",
+        "tobento/app-console": "^1.0",
         "tobento/app-event": "^1.0.1",
         "tobento/service-console": "^1.0.1",
         "tobento/service-container": "^1.0",
