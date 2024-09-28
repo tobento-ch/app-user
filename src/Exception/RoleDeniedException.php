@@ -33,16 +33,16 @@ class RoleDeniedException extends AuthorizationException
      */
     public function __construct(
         protected string $role,
-        protected string $userMessage = '',
+        string $message = '',
         protected string $messageLevel = '',
         protected null|string $redirectUri = null,
         protected null|string $redirectRoute = null,
-        string $message = '',
+        protected string $reason = '',
         int $code = 0,
         null|Throwable $previous = null
     ) {
         if ($message === '') {
-            $message = sprintf('You don\'t have a required "%s" role.', $this->role);    
+            $message = sprintf('You don\'t have a required %s role.', $this->role);    
         }
         
         parent::__construct(
@@ -63,5 +63,15 @@ class RoleDeniedException extends AuthorizationException
     public function role(): string
     {
         return $this->role;
+    }
+    
+    /**
+     * Returns the reason.
+     *
+     * @return string
+     */
+    public function reason(): string
+    {
+        return $this->reason;
     }
 }

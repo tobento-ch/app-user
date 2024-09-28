@@ -28,21 +28,22 @@ class PermissionDeniedException extends AuthorizationException
      * @param string $messageLevel
      * @param null|string $redirectUri
      * @param null|string $redirectRoute
+     * @param string $reason
      * @param int $code
      * @param null|Throwable $previous
      */
     public function __construct(
         protected string $permission,
-        protected string $userMessage = '',
+        string $message = '',
         protected string $messageLevel = '',
         protected null|string $redirectUri = null,
         protected null|string $redirectRoute = null,
-        string $message = '',
+        protected string $reason = '',
         int $code = 0,
         null|Throwable $previous = null
     ) {
-        if ($message === '') {
-            $message = sprintf('You don\'t have a required "%s" permission.', $this->permission);    
+        if ($message === '' && $this->permission !== '') {
+            $message = sprintf('You don\'t have a required "%s" permission.', $this->permission);
         }
         
         parent::__construct(
@@ -63,5 +64,15 @@ class PermissionDeniedException extends AuthorizationException
     public function permission(): string
     {
         return $this->permission;
+    }
+    
+    /**
+     * Returns the reason.
+     *
+     * @return string
+     */
+    public function reason(): string
+    {
+        return $this->reason;
     }
 }
