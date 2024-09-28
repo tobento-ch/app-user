@@ -55,9 +55,7 @@ class Acl extends Boot
             
             // at least guest role needs to be available:
             if (! $acl->hasRole('guest')) {
-                $acl->setRoles([
-                    new Role('guest'),
-                ]);
+                $acl->setRoles($acl->roles()->add(new Role('guest')));
             }
             
             return $acl;
