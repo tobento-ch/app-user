@@ -33,7 +33,7 @@ class RoleStorageRepository extends StorageRepository implements RoleRepositoryI
     protected function configureColumns(): iterable|ColumnsInterface
     {
         return [
-            //Column\Id::new(),
+            Column\Id::new(),
             Column\Text::new('key'),
             Column\Boolean::new('active'),
             Column\Text::new('name'),
