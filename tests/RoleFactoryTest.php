@@ -32,6 +32,7 @@ class RoleFactoryTest extends TestCase
         $roleFactory = new RoleFactory();
         
         $role = $roleFactory->createEntityFromArray([
+            'id' => 1,
             'key' => 'editor',
             'areas' => ['backend'],
             'active' => true,
@@ -49,6 +50,7 @@ class RoleFactoryTest extends TestCase
         $roleFactory = new RoleFactory();
         
         $role = $roleFactory->createEntityFromArray([
+            'id' => 1,
             'key' => 'editor',
             'permissions' => ['article.create', 'article.update'],
         ]);
