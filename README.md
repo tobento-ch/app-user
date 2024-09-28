@@ -30,11 +30,13 @@ User support for the app with authentication and authorization.
         - [Unauthenticated Middleware](#unauthenticated-middleware)
         - [Verified Middleware](#verified-middleware)
         - [Verify Permission Middleware](#verify-permission-middleware)
+        - [Verify Route Permission Middleware](#verify-route-permission-middleware)
         - [Verify Role Middleware](#verify-role-middleware)
     - [Authenticator](#authenticator)
         - [Identity Authenticator](#identity-authenticator)
         - [Attributes Authenticator](#attributes-authenticator)
         - [User Verifier](#user-verifier)
+            - [User Permission Verifier](#user-permission-verifier)
             - [User Role Verifier](#user-role-verifier)
             - [User Role Area Verifier](#user-role-area-verifier)
         - [Token Authenticator](#token-authenticator)
@@ -1107,6 +1109,63 @@ $app->run();
 
 Check out the [Http User Error Handler Boot](#http-user-error-handler-boot) how to handle the exception.
 
+### Verify Route Permission Middleware
+
+The ```VerifyRoutePermission::class``` middleware protects routes from users without the defined permissions. If a user has insufficient permission a ```Tobento\App\User\Exception\PermissionDeniedException::class``` will be thrown.
+
+```php
+use Tobento\App\AppFactory;
+use Tobento\App\User\Middleware\VerifyRoutePermission;
+
+$app = (new AppFactory())->createApp();
+
+// Add directories:
+$app->dirs()
+    ->dir(realpath(__DIR__.'/../'), 'root')
+    ->dir(realpath(__DIR__.'/../app/'), 'app')
+    ->dir($app->dir('app').'config', 'config', group: 'config')
+    ->dir($app->dir('root').'public', 'public')
+    ->dir($app->dir('root').'vendor', 'vendor');
+
+// Adding boots:
+$app->boot(\Tobento\App\Http\Boot\Routing::class);
+$app->boot(\Tobento\App\User\Boot\User::class);
+$app->booting();
+
+// Routes:
+$app->routeResource('roles', RolesController::class))
+    ->middleware([
+        VerifyRoutePermission::class,
+        'permissions' => [
+            // 'route.name' => 'permission'
+            'roles.index' => 'roles',
+            'roles.show' => 'roles',
+            'roles.create' => 'roles.create',
+            'roles.store' => 'roles.create',
+            'roles.edit' => 'roles.edit',
+            'roles.update' => 'roles.edit',
+            'roles.delete' => 'roles.delete',
+        ],
+        
+        // you may specify a custom message to show to the user:
+        'message' => 'You do not have permission to access the resource!',
+
+        // you may specify a message level:
+        'messageLevel' => 'notice',
+
+        // you may specify a route name for redirection:
+        'redirectRoute' => 'home',
+
+        // or you may specify an uri for redirection
+        'redirectUri' => '/home',
+    ]);
+
+// Run the app:
+$app->run();
+```
+
+Check out the [Http User Error Handler Boot](#http-user-error-handler-boot) how to handle the exception.
+
 ### Verify Role Middleware
 
 The ```VerifyRole::class``` middleware protects routes from users without the defined role(s). If a user has insufficient role a ```Tobento\App\User\Exception\RoleDeniedException::class``` will be thrown.
@@ -1331,6 +1390,15 @@ class LoginController
 ### User Verifier
 
 User verifiers may be used to verify certain user attributes while authenticating a user. See [Identity Authenticator](#identity-authenticator) for instance.
+
+#### User Permission Verifier
+
+```php
+use Tobento\App\User\Authenticator\UserPermissionVerifier;
+
+// User must have one the specified permission.
+$verifier = new UserPermissionVerifier('permission');
+```
 
 #### User Role Verifier
 
