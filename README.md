@@ -2104,8 +2104,7 @@ $verified = $user->isOneVerified(channels: ['email', 'smartphone']);
 
 You may use the following user bundles for your app.
 
-* [App User Web](#) - Login, register and more. (Coming soon)
-* [App User Manager](#) - CRUD for users, roles and permissions. (Coming soon)
+* [App User Web](https://github.com/tobento-ch/app-user-web) - Login, register and more.
 * [App User Jwt](#) - Authentication via JSON web token support. (Coming soon)
 * [App User Login Link](#) - Authentication via login link. (Coming soon)
 
