@@ -89,4 +89,18 @@ class UserTest extends TestCase
         $this->assertTrue($user->isOneVerified(['email', 'smartphone', 'slack']));
         $this->assertTrue($user->isOneVerified(['email', 'slack']));
     }
+    
+    public function testSettingMethods()
+    {
+        $user = new User();
+        $this->assertSame([], $user->getSettings());
+        
+        $user = new User();
+        $user->setSettings(['key' => 'value']);
+        $this->assertSame(['key' => 'value'], $user->getSettings());
+        $this->assertSame('value', $user->setting(name: 'key', default: null));
+        $this->assertSame('value', $user->setting(name: 'key', default: 'foo'));
+        $this->assertSame(null, $user->setting(name: 'bar', default: null));
+        $this->assertSame('foo', $user->setting(name: 'bar', default: 'foo'));
+    }
 }
