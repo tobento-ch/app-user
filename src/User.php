@@ -152,6 +152,16 @@ class User extends BaseUser implements UserInterface, Authorizable
     }
     
     /**
+     * Returns the user settings.
+     *
+     * @return array<string, mixed>
+     */
+    public function getSettings(): array
+    {
+        return $this->settings;
+    }
+    
+    /**
      * Returns a setting value by name.
      *
      * @param string $name
@@ -172,7 +182,8 @@ class User extends BaseUser implements UserInterface, Authorizable
         $user = parent::toArray();
         $user['isAuthenticated'] = $this->isAuthenticated();
         $user['verified'] = $this->getVerified();
-        $user['settings'] = $this->settings;
+        $user['settings'] = $this->getSettings();
+        $user['permissions'] = $this->getPermissions();
 
         if ($this->hasRole()) {
             $role = $this->role();
