@@ -19,7 +19,7 @@ use Tobento\App\User\Authenticator\TokenPasswordHashVerifier;
 use Tobento\App\User\Authenticator\TokenVerifierInterface;
 use Tobento\App\User\Authentication\Token\Token;
 use Tobento\App\User\Exception\TokenException;
-use Tobento\App\User\Exception\InvalidTokenException;
+use Tobento\App\User\Exception\InvalidateTokenException;
 use DateTimeImmutable;
 
 class TokenPasswordHashVerifierTest extends TestCase
@@ -54,7 +54,7 @@ class TokenPasswordHashVerifierTest extends TestCase
     
     public function testVerifyFailsIfPasswordHashDoesNotMatch()
     {
-        $this->expectException(InvalidTokenException::class);
+        $this->expectException(InvalidateTokenException::class);
         
         $verifier = new TokenPasswordHashVerifier();
         

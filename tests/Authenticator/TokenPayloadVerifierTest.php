@@ -19,7 +19,7 @@ use Tobento\App\User\Authenticator\TokenPayloadVerifier;
 use Tobento\App\User\Authenticator\TokenVerifierInterface;
 use Tobento\App\User\Authentication\Token\Token;
 use Tobento\App\User\Exception\TokenException;
-use Tobento\App\User\Exception\InvalidTokenException;
+use Tobento\App\User\Exception\InvalidateTokenException;
 use DateTimeImmutable;
 
 class TokenPayloadVerifierTest extends TestCase
@@ -55,7 +55,7 @@ class TokenPayloadVerifierTest extends TestCase
     
     public function testVerifyFailsIfValueDoesNotMatch()
     {
-        $this->expectException(InvalidTokenException::class);
+        $this->expectException(InvalidateTokenException::class);
         
         $verifier = new TokenPayloadVerifier(
             name: 'name',
