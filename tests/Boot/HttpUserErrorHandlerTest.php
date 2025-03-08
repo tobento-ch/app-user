@@ -15,10 +15,13 @@ namespace Tobento\App\Test\Boot;
 
 use PHPUnit\Framework\TestCase;
 use Tobento\App\User\Test\Factory;
+use Tobento\App\User\Authentication\Token\TokenStorageInterface;
 use Tobento\App\User\Boot\HttpUserErrorHandler;
 use Tobento\App\User\Exception\TokenExpiredException;
+use Tobento\App\User\Exception\TokenNotFoundException;
 use Tobento\App\User\Exception\AuthenticationException;
 use Tobento\App\User\Exception\AuthorizationException;
+use Tobento\App\User\Exception\InvalidateTokenException;
 use Tobento\App\Http\Boot\Http;
 use Tobento\App\Http\ResponseEmitterInterface;
 use Tobento\App\Http\Test\TestResponse;
@@ -106,6 +109,48 @@ class HttpUserErrorHandlerTest extends TestCase
         (new TestResponse($app->get(Http::class)->getResponse()))
             ->isStatusCode(403)
             ->isBodySame('{"status":403,"message":"419 | Resource Expired"}');
+    }
+    
+    public function testInvalidateTokenException()
+    {
+        $app = $this->createApp();
+        $app->boot(\Tobento\App\Http\Boot\Routing::class);
+        $app->boot(\Tobento\App\User\Boot\User::class);
+        $app->boot(\Tobento\App\User\Boot\HttpUserErrorHandler::class);
+        
+        $app->on(ServerRequestInterface::class, function() {
+            return (new Psr17Factory())->createServerRequest(method: 'GET', uri: 'foo');
+        });
+        
+        $app->booting();
+        
+        $tokenStorage = $app->get(TokenStorageInterface::class);
+        $token = $tokenStorage->createToken(
+            payload: ['userId' => 2, 'passwordHash' => 'hashedPassword'],
+            authenticatedVia: 'via',
+        );
+        
+        $this->assertNotNull($tokenStorage->fetchToken(id: $token->id()));
+        
+        $app->route('GET', 'foo', function(ServerRequestInterface $request) use ($token) {
+            throw new InvalidateTokenException(token: $token);
+        });
+
+        $app->run();
+        
+        $tokenDeleted = false;
+        
+        try {
+            $tokenStorage->fetchToken(id: $token->id());
+        } catch (TokenNotFoundException $e) {
+            $tokenDeleted = true;
+        }
+        
+        $this->assertTrue($tokenDeleted);
+        
+        (new TestResponse($app->get(Http::class)->getResponse()))
+            ->isStatusCode(403)
+            ->isBodySame('419 | Resource Expired');
     }
     
     public function testAuthenticationException()
