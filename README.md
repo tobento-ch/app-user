@@ -35,10 +35,11 @@ User support for the app with authentication and authorization.
     - [Authenticator](#authenticator)
         - [Identity Authenticator](#identity-authenticator)
         - [Attributes Authenticator](#attributes-authenticator)
-        - [User Verifier](#user-verifier)
+        - [User Verifiers](#user-verifiers)
             - [User Permission Verifier](#user-permission-verifier)
             - [User Role Verifier](#user-role-verifier)
             - [User Role Area Verifier](#user-role-area-verifier)
+            - [User Verifier](#user-verifier)
         - [Token Authenticator](#token-authenticator)
         - [Token Verifier](#token-verifier)
             - [Token Password Hash Verifier](#token-verifier)
@@ -1387,7 +1388,7 @@ class LoginController
 }
 ```
 
-### User Verifier
+### User Verifiers
 
 User verifiers may be used to verify certain user attributes while authenticating a user. See [Identity Authenticator](#identity-authenticator) for instance.
 
@@ -1416,6 +1417,24 @@ use Tobento\App\User\Authenticator\UserRoleAreaVerifier;
 
 // User must have one of the specified role area.
 $verifier = new UserRoleAreaVerifier('frontend', 'api');
+```
+
+#### User Verifier
+
+```php
+use Tobento\App\User\Authenticator\UserVerifier;
+use Tobento\App\User\UserInterface;
+
+// Using a bool:
+$verifier = new UserVerifier(verified: true);
+
+// Using a closure:
+$verifier = new UserVerifier(
+    verified: fn (UserInterface $user): bool => $user->active(),
+    
+    // you may set an expection message:
+    message: 'User must be active'
+);
 ```
 
 ### Token Authenticator
