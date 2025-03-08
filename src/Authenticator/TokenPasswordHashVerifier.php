@@ -17,7 +17,7 @@ use Tobento\App\User\Authentication\Token\TokenInterface;
 use Tobento\App\User\UserInterface;
 use Tobento\App\User\Exception\AuthenticationException;
 use Tobento\App\User\Exception\TokenException;
-use Tobento\App\User\Exception\InvalidTokenException;
+use Tobento\App\User\Exception\InvalidateTokenException;
 
 /**
  * TokenPasswordHashVerifier
@@ -67,7 +67,7 @@ final class TokenPasswordHashVerifier implements TokenVerifierInterface
         }
         
         if ($token->payload()[$this->name] !== $user->password()) {
-            throw new InvalidTokenException(message: 'User password hash mismatch', token: $token);
+            throw new InvalidateTokenException(message: 'User password hash mismatch', token: $token);
         }
     }
 }

@@ -17,7 +17,7 @@ use Tobento\App\User\Authentication\Token\TokenInterface;
 use Tobento\App\User\UserInterface;
 use Tobento\App\User\Exception\AuthenticationException;
 use Tobento\App\User\Exception\TokenException;
-use Tobento\App\User\Exception\InvalidTokenException;
+use Tobento\App\User\Exception\InvalidateTokenException;
 
 /**
  * Verifies a token payload attribute.
@@ -72,7 +72,7 @@ final class TokenPayloadVerifier implements TokenVerifierInterface
         }
         
         if ($token->payload()[$this->name] !== $this->value) {
-            throw new InvalidTokenException(
+            throw new InvalidateTokenException(
                 message: sprintf('Token payload %s mismatch', $this->name),
                 token: $token
             );
