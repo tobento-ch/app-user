@@ -18,7 +18,6 @@ use Tobento\Service\Repository\Storage\Column\ColumnsInterface;
 use Tobento\Service\Repository\Storage\Column\ColumnInterface;
 use Tobento\Service\Repository\Storage\Column;
 use Tobento\Service\Repository\RepositoryReadException;
-use Tobento\Service\Acl\RoleInterface;
 
 /**
  * RoleStorageRepository

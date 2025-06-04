@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Tobento\App\User;
 
-use Tobento\Service\Acl\RoleInterface;
 use Tobento\Service\Acl\Role as BaseRole;
 
 /**

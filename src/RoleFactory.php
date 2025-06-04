@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Tobento\App\User;
 
 use Tobento\Service\Repository\Storage\EntityFactory;
-use Tobento\Service\Acl\RoleInterface;
 
 /**
  * RoleFactory
