@@ -84,6 +84,8 @@ class UserFactory extends EntityFactory implements UserFactoryInterface
             addresses: $addresses,
         );
         
+        $this->syncPrimaryAddress($user);
+        
         // Get specific role:
         $role = $this->acl->getRole($data->get('role_key', 'guest'));
 
@@ -141,5 +143,34 @@ class UserFactory extends EntityFactory implements UserFactoryInterface
         // add empty addresses as to avoid fetching addresses
         // from the address repository in the createEntityFromArray method!
         return $this->createEntityFromArray(['role_key' => 'guest', 'addresses' => []]);
+    }
+    
+    /**
+     * Syncs primary address.
+     *
+     * @param UserInterface $user
+     * @return void
+     */
+    protected function syncPrimaryAddress(UserInterface $user): void
+    {
+        $address = $user->address();
+
+        if (empty($address->locale())) {
+            $address = $address->withLocale($user->locale());
+        }
+        
+        if (empty($address->email())) {
+            $address = $address->withEmail($user->email());
+        }
+        
+        if (empty($address->smartphone())) {
+            $address = $address->withSmartphone($user->smartphone());
+        }
+        
+        if (empty($address->birthday())) {
+            $address = $address->withBirthday($user->birthday());
+        }
+        
+        $user->addresses()->add($address);
     }
 }
