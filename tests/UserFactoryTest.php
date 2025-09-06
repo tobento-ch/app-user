@@ -281,4 +281,45 @@ class UserFactoryTest extends TestCase
         $this->assertSame(0, $user->id());
         $this->assertSame('guest', $user->role()->key());
     }
+    
+    public function testPrimaryAddressIsSynced()
+    {
+        $userFactory = new UserFactory(
+            acl: Factory::createAcl(),
+            addressRepository: Factory::createAddressRepository(),
+            addressFactory: Factory::createAddressFactory(),
+        );
+        
+        $user = $userFactory->createEntityFromArray([
+            'id' => 2,
+            'email' => 'tom@example.com',
+            'smartphone' => '111222333',
+            'locale' => 'de',
+            'birthday' => '2000-05-10',
+        ]);
+        
+        $this->assertSame('tom@example.com', $user->address()->email());
+        $this->assertSame('111222333', $user->address()->smartphone());
+        $this->assertSame('de', $user->address()->locale());
+        $this->assertSame('2000-05-10', $user->address()->birthday());
+        
+        $user = $userFactory->createEntityFromArray([
+            'id' => 3,
+            'email' => 'tom@example.com',
+            'smartphone' => '111222333',
+            'locale' => 'de',
+            'birthday' => '2000-05-10',
+            'address' => [
+                'email' => 'tim@example.com',
+                'smartphone' => '999888777',
+                'locale' => 'fr',
+                'birthday' => '1988-05-10',
+            ],
+        ]);
+        
+        $this->assertSame('tim@example.com', $user->address()->email());
+        $this->assertSame('999888777', $user->address()->smartphone());
+        $this->assertSame('fr', $user->address()->locale());
+        $this->assertSame('1988-05-10', $user->address()->birthday());
+    }
 }
