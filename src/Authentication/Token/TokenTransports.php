@@ -95,15 +95,15 @@ class TokenTransports implements TokenTransportsInterface, TokenTransportInterfa
             throw new TokenTransportException(sprintf('Transport [%s] not found!', $name));
         }
         
-        if (! $this->transports[$name] instanceof TokenTransportInterface) {
-            try {
-                $this->transports[$name] = $this->createTransport($name, $this->transports[$name]);
-            } catch(Throwable $e) {
-                throw new TokenTransportException($e->getMessage(), (int)$e->getCode(), $e);
-            }
+        if ($this->transports[$name] instanceof TokenTransportInterface) {
+            return $this->transports[$name];
         }
         
-        return $this->transports[$name];
+        try {
+            return $this->transports[$name] = $this->createTransport($name, $this->transports[$name]);
+        } catch(Throwable $e) {
+            throw new TokenTransportException($e->getMessage(), (int)$e->getCode(), $e);
+        }
     }
     
     /**

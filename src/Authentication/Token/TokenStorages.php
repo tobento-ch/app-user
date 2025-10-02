@@ -77,15 +77,15 @@ class TokenStorages implements TokenStoragesInterface
             throw new TokenStorageException(sprintf('Storage [%s] not found!', $name));
         }
         
-        if (! $this->storages[$name] instanceof TokenStorageInterface) {
-            try {
-                $this->storages[$name] = $this->createStorage($name, $this->storages[$name]);
-            } catch(Throwable $e) {
-                throw new TokenStorageException($e->getMessage(), (int)$e->getCode(), $e);
-            }
+        if ($this->storages[$name] instanceof TokenStorageInterface) {
+            return $this->storages[$name];
         }
         
-        return $this->storages[$name];
+        try {
+            return $this->storages[$name] = $this->createStorage($name, $this->storages[$name]);
+        } catch(Throwable $e) {
+            throw new TokenStorageException($e->getMessage(), (int)$e->getCode(), $e);
+        }
     }
     
     /**
