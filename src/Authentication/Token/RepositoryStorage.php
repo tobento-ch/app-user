@@ -159,7 +159,7 @@ final class RepositoryStorage implements TokenStorageInterface, CanDeleteExpired
                 'expires_at' => $token->expiresAt(),
             ]);
         } catch (RepositoryCreateException $e) {
-            throw new TokenCreateException($e->getMessage(), (int)$e->getCode(), $e, $token);
+            throw new TokenCreateException($e->getMessage(), $e->getCode(), $e, $token);
         }
         
         return $token;
@@ -183,7 +183,7 @@ final class RepositoryStorage implements TokenStorageInterface, CanDeleteExpired
         try {
             $this->repository->delete(where: ['id' => $itemId]);
         } catch (RepositoryDeleteException $e) {
-            throw new TokenDeleteException($e->getMessage(), (int)$e->getCode(), $e, $token);
+            throw new TokenDeleteException($e->getMessage(), $e->getCode(), $e, $token);
         }
     }
     

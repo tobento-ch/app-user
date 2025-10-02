@@ -31,9 +31,9 @@ class TokenRepository extends StorageRepository
     protected function configureColumns(): iterable|ColumnsInterface
     {
         return [
-            Column\Text::new('id'),
-            Column\Json::new('token'),
-            Column\Datetime::new('expires_at', type: 'timestamp')->type(nullable: true),
+            new Column\Text('id'),
+            new Column\Json('token'),
+            new Column\Datetime(name: 'expires_at', type: 'timestamp')->type(nullable: true),
         ];
     }
 }

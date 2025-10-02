@@ -164,10 +164,10 @@ class UserStorageRepositoryTest extends TestCase
             table: 'addresses',
             addressFactory: Factory::createAddressFactory(),
             columns: [
-                Column\Id::new(),
-                Column\Text::new('key'),
-                Column\Integer::new('user_id'),
-                Column\Text::new('firstname')->write(fn () => throw new \Exception()),
+                new Column\Id(),
+                new Column\Text('key'),
+                new Column\Integer('user_id'),
+                new Column\Text('firstname')->write(fn () => throw new \Exception()),
             ],
         );
         

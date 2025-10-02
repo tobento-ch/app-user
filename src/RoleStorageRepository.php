@@ -32,12 +32,12 @@ class RoleStorageRepository extends StorageRepository implements RoleRepositoryI
     protected function configureColumns(): iterable|ColumnsInterface
     {
         return [
-            Column\Id::new(),
-            Column\Text::new('key'),
-            Column\Boolean::new('active'),
-            Column\Text::new('name'),
-            Column\Json::new('areas'),
-            Column\Json::new('permissions'),
+            new Column\Id(),
+            new Column\Text('key'),
+            new Column\Boolean('active'),
+            new Column\Text('name'),
+            new Column\Json('areas'),
+            new Column\Json('permissions'),
         ];
     }
     
