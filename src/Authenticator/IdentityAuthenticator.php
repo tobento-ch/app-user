@@ -208,7 +208,7 @@ class IdentityAuthenticator implements AuthenticatorInterface
     /**
      * Sets the userInputName.
      *
-     * @param string $requestMethod
+     * @param string $userInputName
      * @return static $this
      */
     public function userInputName(string $userInputName): static
@@ -230,7 +230,7 @@ class IdentityAuthenticator implements AuthenticatorInterface
     /**
      * Sets the passwordInputName.
      *
-     * @param string $requestMethod
+     * @param string $passwordInputName
      * @return static $this
      */
     public function passwordInputName(string $passwordInputName): static

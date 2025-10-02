@@ -33,7 +33,7 @@ class AclRulesCommand extends AbstractCommand
      * Handle the command.
      *
      * @param InteractorInterface $io
-     * @param TokenStoragesInterface $tokenStorages
+     * @param AclInterface $acl
      * @return int The exit status code: 
      *     0 SUCCESS
      *     1 FAILURE If some error happened during the execution
