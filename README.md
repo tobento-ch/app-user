@@ -77,7 +77,7 @@ composer require tobento/app-user
 
 ## Requirements
 
-- PHP 8.0 or greater
+- PHP 8.4 or greater
 
 # Documentation
 
@@ -99,7 +99,7 @@ The user boot does the following:
 use Tobento\App\AppFactory;
 
 // Create the app
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Adding boots
 $app->boot(\Tobento\App\User\Boot\User::class);
@@ -126,7 +126,7 @@ use Tobento\App\User\RoleRepositoryInterface;
 use Tobento\App\User\RoleFactoryInterface;
 use Tobento\Service\Repository\RepositoryInterface;
 
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -181,7 +181,7 @@ use Tobento\App\User\Authentication\Token\TokenTransportInterface;
 use Tobento\App\User\Authenticator\TokenAuthenticatorInterface;
 use Tobento\App\User\Authenticator\UserVerifierInterface;
 
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -231,7 +231,7 @@ use Tobento\Service\User\UserInterface as ServiceUserInterface;
 use Tobento\Service\Acl\Authorizable;
 use Psr\Http\Message\ServerRequestInterface;
 
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -286,7 +286,7 @@ use Tobento\Service\User\UserInterface as ServiceUserInterface;
 use Tobento\Service\Acl\Authorizable;
 use Psr\Http\Message\ServerRequestInterface;
 
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -453,7 +453,7 @@ use Tobento\App\AppFactory;
 use Tobento\Service\Acl\AclInterface;
 
 // Create the app
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Adding boots
 
@@ -579,7 +579,7 @@ use Tobento\App\AppFactory;
 use Tobento\Service\Acl\AclInterface;
 
 // Create the app
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Adding boots
 
@@ -751,7 +751,7 @@ The http user error handler boot handles any user specific exceptions such as:
 use Tobento\App\AppFactory;
 
 // Create the app
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Adding boots
 $app->boot(\Tobento\App\User\Boot\HttpUserErrorHandler::class);
@@ -863,7 +863,7 @@ The ```Authenticated::class``` middleware protects routes from unauthenticated u
 use Tobento\App\AppFactory;
 use Tobento\App\User\Middleware\Authenticated;
 
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -926,7 +926,7 @@ The ```Unauthenticated::class``` middleware protects routes from authenticated u
 use Tobento\App\AppFactory;
 use Tobento\App\User\Middleware\Unauthenticated;
 
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -989,7 +989,7 @@ The ```Verified::class``` middleware protects routes from unverified users.
 use Tobento\App\AppFactory;
 use Tobento\App\User\Middleware\Verified;
 
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -1054,7 +1054,7 @@ The ```VerifyPermission::class``` middleware protects routes from users without 
 use Tobento\App\AppFactory;
 use Tobento\App\User\Middleware\VerifyPermission;
 
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -1118,7 +1118,7 @@ The ```VerifyRoutePermission::class``` middleware protects routes from users wit
 use Tobento\App\AppFactory;
 use Tobento\App\User\Middleware\VerifyRoutePermission;
 
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -1175,7 +1175,7 @@ The ```VerifyRole::class``` middleware protects routes from users without the de
 use Tobento\App\AppFactory;
 use Tobento\App\User\Middleware\VerifyRole;
 
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Add directories:
 $app->dirs()
@@ -1702,7 +1702,7 @@ return [
 use Tobento\App\AppFactory;
 
 // Create the app
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Adding boots
 $app->boot(\Tobento\App\User\Boot\User::class);
@@ -1760,7 +1760,7 @@ return [
 use Tobento\App\AppFactory;
 
 // Create the app
-$app = (new AppFactory())->createApp();
+$app = new AppFactory()->createApp();
 
 // Adding boots
 $app->boot(\Tobento\App\User\Boot\User::class);
