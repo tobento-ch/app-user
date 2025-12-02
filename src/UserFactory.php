@@ -81,6 +81,7 @@ class UserFactory extends EntityFactory implements UserFactoryInterface
             dateLastVisited: $data->get('date_last_visited', ''),
             image: $data->get('image', []),
             newsletter: $data->get('newsletter', false),
+            meta: $data->get('meta', []),
             addresses: $addresses,
         );
         
