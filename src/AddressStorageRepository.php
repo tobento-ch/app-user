@@ -83,6 +83,7 @@ class AddressStorageRepository extends StorageRepository implements AddressRepos
             new Column\Text(name: 'notice', type: 'text'),
             new Column\Text(name: 'info', type: 'text'),
             new Column\Boolean('selectable'),
+            new Column\Json('meta'),
         ];
     }
     

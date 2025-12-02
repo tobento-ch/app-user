@@ -75,6 +75,7 @@ class UserStorageRepository extends StorageRepository implements UserRepositoryI
             new Column\Datetime('date_last_visited'),
             new Column\Json('image'),
             new Column\Boolean('newsletter'),
+            new Column\Json('meta'),
             new Column\Json('permissions'),
             new Column\Json('verified'),
             new Column\Json('settings'),
